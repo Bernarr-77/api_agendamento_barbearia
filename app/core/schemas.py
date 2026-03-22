@@ -11,3 +11,15 @@ class UserOutput(BaseModel):
     email: str
     role: str
     model_config = ConfigDict(from_attributes=True)
+
+class ProviderInput(BaseModel):
+    user_id: int
+    bio: str
+    specialty: str
+
+class ProviderOutput(BaseModel):
+    id: int
+    user_id: int
+    bio: str
+    specialty: str
+    model_config = ConfigDict(from_attributes=True)

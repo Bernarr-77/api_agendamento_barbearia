@@ -5,9 +5,9 @@ from app.db.repositorio import register_user,get_user_by_id
 from app.db.session import get_db
 from sqlalchemy.exc import IntegrityError
 
-router = APIRouter()
+router_user = APIRouter()
 
-@router.post("/register_users/", response_model=UserOutput)
+@router_user.post("/register_users/", response_model=UserOutput)
 def user_register(payload: UserInput, db = Depends(get_db)):
     hashed = hash_password(payload.password)
     try:
@@ -18,7 +18,7 @@ def user_register(payload: UserInput, db = Depends(get_db)):
         raise HTTPException(status_code=500, detail= f"Erro desconhecido: {str(error_500)}")
     return retorno
 
-@router.get("/buscar_usuario/{id}",response_model=UserOutput)
+@router_user.get("/buscar_usuario/{id}",response_model=UserOutput)
 def get_usuarios(id:int, db = Depends(get_db)):
     if id is None:
         raise HTTPException(status_code=400, detail="Você precisa mandar pelo menos um dado.")

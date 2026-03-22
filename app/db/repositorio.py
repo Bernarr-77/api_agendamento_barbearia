@@ -1,4 +1,4 @@
-from app.db.models import User
+from app.db.models import User,Provider
 from sqlalchemy.orm import Session
 
 def register_user(db: Session ,nome,mail,password,new_role = "CLIENT"):
@@ -14,4 +14,17 @@ def get_user_by_id(db: Session, id:int):
         if usuario:
                 return usuario
         else: 
+                return None
+        
+def register_provider(db: Session, id: int, biografia, especialidade, provider_role = "PROVIDER"):
+        user = db.get(User, id)
+        if user:
+                user.role = provider_role
+                db.commit()
+                new_provider = Provider(user_id=id,bio=biografia, specialty=especialidade)
+                db.add(new_provider)
+                db.commit()
+                db.refresh(new_provider)
+                return new_provider
+        else:
                 return None
