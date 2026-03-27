@@ -1,4 +1,4 @@
-from app.db.models import User,Provider,Service
+from app.db.models import User,Provider,Service,StatusProvider
 from sqlalchemy.orm import Session
 from sqlalchemy import select,delete
 from typing import Optional
@@ -31,7 +31,7 @@ def register_provider(db: Session, id: int, biografia, especialidade, provider_r
         else:
                 return None
 def get_all_providers(db: Session, especialidade: Optional[str] = None):
-        query = select(Provider)
+        query = select(Provider).where(Provider.operando == StatusProvider.ATIVO)
         if especialidade is not None:
                 query = query.filter(Provider.specialty.ilike(f'%{especialidade}%'))
                 resultados = db.scalars(query).all()
@@ -43,19 +43,20 @@ def get_all_providers(db: Session, especialidade: Optional[str] = None):
                 return resultados
         return None
 def get_provider_by_id(db: Session,id: int):
-        provider = db.get(Provider, id)
-        if provider:
-                return provider
+        query = select(Provider).where(Provider.operando == StatusProvider.ATIVO, Provider.id == id)
+        resultado = db.scalars(query).first()
+        
+        if resultado:
+                return resultado
         return None
 
 def delete_provider(db: Session, id):
         verificador = get_provider_by_id(db,id)
         if verificador is None:
                 return None
-        query = delete(Provider).where(Provider.id == id)
-        resultado = db.execute(query)
+        verificador.operando = StatusProvider.INATIVO
         db.commit()
-        return resultado
+        return 'Provider inativo com sucesso '
 
 def criar_services(db: Session, id: int, name, duracao, price:float):
         provedor = get_provider_by_id(db, id)

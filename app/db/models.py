@@ -11,6 +11,10 @@ class Status(enum.Enum):
     CONFIRMADO = 'CONFIRMADO'
     CANCELADO = 'CANCELADO'
 
+class StatusProvider(enum.Enum):
+    ATIVO = 'ATIVO'
+    INATIVO = 'INATIVO'
+
 class User(Base):
     __tablename__ = "usuarios"
     id: Mapped[int] = mapped_column(primary_key=True,autoincrement=True)
@@ -29,6 +33,7 @@ class Provider(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("usuarios.id"))
     bio: Mapped[str] = mapped_column(nullable=False)
     specialty: Mapped[str] = mapped_column(nullable=False)
+    operando: Mapped[StatusProvider] = mapped_column(Enum(StatusProvider),nullable=False,server_default='ATIVO')
 
     user: Mapped["User"]= relationship(back_populates="provider")
     service: Mapped[list["Service"]] = relationship(back_populates="service_provider",cascade='all, delete-orphan')
