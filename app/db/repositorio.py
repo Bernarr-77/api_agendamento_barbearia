@@ -42,6 +42,7 @@ def get_all_providers(db: Session, especialidade: Optional[str] = None):
         if resultados:
                 return resultados
         return None
+
 def get_provider_by_id(db: Session,id: int):
         query = select(Provider).where(Provider.operando == StatusProvider.ATIVO, Provider.id == id)
         resultado = db.scalars(query).first()
@@ -57,6 +58,18 @@ def delete_provider(db: Session, id):
         verificador.operando = StatusProvider.INATIVO
         db.commit()
         return 'Provider inativo com sucesso '
+
+def atualizar_provider(db:Session, id, biografia: Optional[str] = None, especialidade: Optional[str] = None):
+        verificador = get_provider_by_id(db, id)
+        if verificador is None:
+                return None
+        if biografia is not None:
+                verificador.bio = biografia
+        if especialidade is not None:
+                verificador.specialty = especialidade
+        db.commit()
+        return verificador
+
 
 def criar_services(db: Session, id: int, name, duracao, price:float):
         provedor = get_provider_by_id(db, id)

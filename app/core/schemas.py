@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr,Field, ConfigDict
-
+from typing import Optional
 class UserInput(BaseModel):
     name: str
     email: EmailStr
@@ -17,10 +17,14 @@ class ProviderInput(BaseModel):
     bio: str
     specialty: str
 
+class ProvidersPatch(BaseModel):
+    bio: Optional[str] = None
+    specialty: Optional[str] = None
 class ProviderOutput(BaseModel):
     id: int
     bio: str
     specialty: str
+    operando: str
     model_config = ConfigDict(from_attributes=True)
 
 class ServiceInput(BaseModel):
