@@ -18,6 +18,11 @@ def get_user_by_id(db: Session, id:int):
         else: 
                 return None
         
+        """
+ROTAS PROVIDERS
+==============================================================================
+"""
+        
 def register_provider(db: Session, id: int, biografia, especialidade, provider_role = "PROVIDER"):
         user = db.get(User, id)
         if user:
@@ -78,7 +83,10 @@ def atualizar_provider(db:Session, id, biografia: Optional[str] = None, especial
                 verificador.specialty = especialidade
         db.commit()
         return verificador
-
+"""
+ROTAS SERVICES
+==============================================================================
+"""
 
 def criar_services(db: Session, id: int, name, duracao, price:float):
         provedor = get_provider_by_id(db, id)
@@ -92,8 +100,34 @@ def criar_services(db: Session, id: int, name, duracao, price:float):
         return servico
 
 def buscar_servicos(db: Session, id_provider):
-        query = select(Service).where(Service.provider_id == id_provider)
+        query = select(Service).where(Service.provider_id == id_provider, Provider.operando == StatusProvider.ATIVO)
         resultado = db.scalars(query).all()
         if resultado:
                 return resultado
         return None
+
+def buscar_servico_id(db:Session, id_provider, id_servico):
+        query = select(Service).where(Service.provider_id == id_provider, Service.id == id_servico)
+        resultado = db.scalars(query).first()
+        if resultado:
+                return resultado
+        return None
+def atualizar_servico(db: Session, id_provider, id_servico, nome: Optional[str] = None, duracao: Optional[int] = None, preco: Optional[float] = None):
+        verificar_provider = get_provider_by_id(db,id_provider)
+        if verificar_provider is None:
+                return None
+        verificador_servico = buscar_servico_id(db, id_provider,id_servico)
+        if verificador_servico is None:
+                return None
+        
+        if nome is not None:
+                verificador_servico.name = nome
+        if duracao is not None:
+                verificador_servico.duration_minutes = duracao
+        if preco is not None:
+                verificador_servico.price = preco
+        db.commit()
+        return verificador_servico
+        
+# def apagar_servicos(db:Session, id_provider,id_service):
+        

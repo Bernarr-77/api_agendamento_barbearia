@@ -51,6 +51,9 @@ class Service(Base):
 
     service_provider: Mapped["Provider"] = relationship(back_populates='service')
     servicos_agendados: Mapped[list['Appointments']] = relationship(back_populates='agendamento_servico',cascade='all, delete-orphan')
+    @property
+    def nome(self):
+        return self.service_provider.user.name
 
 class Appointments(Base):
     __tablename__ = "agendamentos"

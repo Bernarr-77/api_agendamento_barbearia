@@ -6,6 +6,6 @@ from app.api.services import router_service
 app = FastAPI()
 
 # app.include_router(router_user)
-app.include_router(router_provider)
-# app.include_router(router_service)
+# app.include_router(router_provider)
+app.include_router(router_service)
 

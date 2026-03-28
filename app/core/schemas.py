@@ -34,8 +34,14 @@ class ServiceInput(BaseModel):
     duration_minutes: int
     price: float
 
+class servicePatch(BaseModel):
+    name: Optional[str] = None
+    duration_minutes: Optional[int] = None
+    price: Optional[float] = None
+
 class ServiceOutput(BaseModel):
     id: int
+    nome: str
     provider_id: int
     name: str
     duration_minutes: int
