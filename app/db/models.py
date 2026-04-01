@@ -62,6 +62,8 @@ class Appointments(Base):
     service_id: Mapped[int] = mapped_column(ForeignKey('servicos.id'))
     agendado_em: Mapped[datetime] = mapped_column(default=datetime.now)
     status: Mapped[str] = mapped_column(Enum(Status), nullable=False)
+    data_hora_inicio: Mapped[datetime] = mapped_column(nullable=False)
+    data_hora_fim: Mapped[datetime] = mapped_column(nullable=False)
     
     agendamento_usuario: Mapped['User'] = relationship(back_populates='agendamento')
     agendamento_servico: Mapped['Service'] = relationship(back_populates= 'servicos_agendados')

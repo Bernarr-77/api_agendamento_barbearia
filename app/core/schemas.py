@@ -1,5 +1,6 @@
 from pydantic import BaseModel, EmailStr,Field, ConfigDict
 from typing import Optional
+from datetime import datetime
 class UserInput(BaseModel):
     name: str
     email: EmailStr
@@ -46,3 +47,8 @@ class ServiceOutput(BaseModel):
     name: str
     duration_minutes: int
     price: float
+
+class AgendamentoInput(BaseModel):
+    client_id: int
+    service_id:int
+    data_hora_inicio: datetime

@@ -2,7 +2,11 @@ from app.db.models import User,Provider,Service,StatusProvider
 from sqlalchemy.orm import Session
 from sqlalchemy import select,delete
 from typing import Optional
-
+from datetime import timedelta,datetime
+"""
+ROTAS USERS
+==============================================================================
+"""
 def register_user(db: Session ,nome,mail,password,new_role = "CLIENT"):
         new_user = User(name=nome,email=mail,
                         hashed_password=password,role=new_role)
@@ -100,7 +104,7 @@ def criar_services(db: Session, id: int, name, duracao, price:float):
         return servico
 
 def buscar_servicos(db: Session, id_provider):
-        query = select(Service).where(Service.provider_id == id_provider, Provider.operando == StatusProvider.ATIVO)
+        query = select(Service).join(Provider).where(Service.provider_id == id_provider, Provider.operando == StatusProvider.ATIVO)
         resultado = db.scalars(query).all()
         if resultado:
                 return resultado
@@ -129,5 +133,16 @@ def atualizar_servico(db: Session, id_provider, id_servico, nome: Optional[str] 
         db.commit()
         return verificador_servico
         
-# def apagar_servicos(db:Session, id_provider,id_service):
-        
+"""
+ROTAS AGENDAMENTOS
+==============================================================================
+"""
+
+def criar_agendamento(db:Session, id_servico:int,id_provider:int,hora_inicial:datetime):
+        servico = buscar_servico_id(db,id_provider, id_servico)
+        if servico is None:
+                return None
+        hora_final = hora_inicial + timedelta(minutes=servico.duration_minutes)
+        if hora_inicial.hour < 9 or (hora_final.hour > 18 and hora_final.minute > 0) : 
+                pass
+        #inacabado
