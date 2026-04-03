@@ -1,70 +1,105 @@
 from fastapi import APIRouter, HTTPException, Depends
-from app.core.schemas import ProviderInput, ProviderOutput,ProvidersPatch
-from app.db.repositorio import register_provider,get_all_providers, get_provider_by_id, delete_provider,atualizar_provider, reativar_provider
-from app.db.session import get_db
+from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 from typing import Optional, List
 
+from app.core.schemas import ProviderInput, ProviderOutput, ProvidersPatch
+from app.db.repositorio import (
+    register_provider,
+    get_all_providers,
+    get_provider_by_id,
+    deactivate_provider,
+    update_provider,
+    reactivate_provider,
+)
+from app.db.session import get_db
 
-router_provider = APIRouter()
+router_provider = APIRouter(prefix="/providers", tags=["Providers"])
 
-@router_provider.post("/register_provider/",  response_model=ProviderOutput)
-def cadastrar_provider(dados: ProviderInput, db = Depends(get_db)):
+
+@router_provider.post("/", response_model=ProviderOutput)
+def register_provider_route(payload: ProviderInput, db: Session = Depends(get_db)):
+    """Registra um novo provider a partir de um usuário existente."""
     try:
-        provider = register_provider(db,dados.user_id,dados.bio,dados.specialty)
+        provider = register_provider(db, payload.user_id, payload.bio, payload.specialty)
         if provider is None:
-            raise HTTPException(status_code=404, detail="Não existe usuario cadastrado")
-    except Exception as error_500:
-        raise HTTPException(status_code=500, detail= f"Erro desconhecido: {str(error_500)}")
+            raise HTTPException(status_code=404, detail="Não existe usuário cadastrado com esse ID")
+    except HTTPException:
+        raise
+    except IntegrityError:
+        raise HTTPException(status_code=409, detail="Conflito de dados únicos")
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Erro desconhecido: {str(exc)}")
     return provider
 
-@router_provider.get("/buscar_providers/", response_model=List[ProviderOutput])
-def buscar_todos(especialidade: Optional[str] = None, db = Depends(get_db)):
+
+@router_provider.get("/", response_model=List[ProviderOutput])
+def get_all_providers_route(specialty: Optional[str] = None, db: Session = Depends(get_db)):
+    """Busca todos os providers ativos, com filtro opcional por especialidade."""
     try:
-        resultado = get_all_providers(db, especialidade)
-        if resultado is None:
+        providers = get_all_providers(db, specialty)
+        if providers is None:
             raise HTTPException(status_code=404, detail="Nenhum provider encontrado")
-    except Exception as error_500:
-        raise HTTPException(status_code=500, detail=f"Erro desconhecido: {str(error_500)}")
-    return resultado
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Erro desconhecido: {str(exc)}")
+    return providers
 
-@router_provider.get("/buscar_id/{id}", response_model=ProviderOutput)
-def buscar_pelo_id(id: int, db = Depends(get_db)):
-    try:
-        retorno = get_provider_by_id(db, id)
-        if retorno is None:
-            raise HTTPException(status_code=404, detail= "Não existe providers com esse id")
-    except Exception as error_500:
-        raise HTTPException(status_code=500, detail=f"Erro desconhecido: {str(error_500)}")
-    return retorno
 
-@router_provider.delete("/deletar_provedor/")
-def apagar_provedor(id_provedor, db = Depends(get_db)):
+@router_provider.get("/{provider_id}", response_model=ProviderOutput)
+def get_provider_by_id_route(provider_id: int, db: Session = Depends(get_db)):
+    """Busca um provider ativo pelo ID."""
     try:
-        apagador = delete_provider(db, id_provedor)
-        if apagador is None:
-            raise HTTPException(status_code=404, detail= "Nenhum provider encontrado")   
-    except Exception as error_500:
-        raise HTTPException(status_code=500, detail=f"Erro desconhecido: {str(error_500)}")
-    return apagador
+        provider = get_provider_by_id(db, provider_id)
+        if provider is None:
+            raise HTTPException(status_code=404, detail="Não existe provider com esse ID")
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Erro desconhecido: {str(exc)}")
+    return provider
 
-@router_provider.patch("/atualizar_provider/{id}", response_model= ProviderOutput)
-def atualizar_provedor(dados: ProvidersPatch, id: int,  db = Depends(get_db)):
-    if dados.bio is None and dados.specialty is None:
-        raise HTTPException(status_code= 400, detail= "Deve ter pelo menos um dado a ser enviado")
-    try:
-        resultado = atualizar_provider(db, id, dados.bio, dados.specialty)
-        if resultado is None:
-            raise HTTPException(status_code=404, detail= "Nenhum provider encontrado ou esta inativo") 
-    except Exception as error_500:
-        raise HTTPException(status_code=500, detail=f"Erro desconhecido: {str(error_500)}")
-    return resultado
 
-@router_provider.patch("/reativar_provider/{id}", response_model=ProviderOutput)
-def reativacao_provider(id, db = Depends(get_db)):
+@router_provider.delete("/{provider_id}")
+def deactivate_provider_route(provider_id: int, db: Session = Depends(get_db)):
+    """Soft-delete: marca o provider como INATIVO."""
     try:
-        reativacao = reativar_provider(db, id)
-        if reativacao is None:
-            raise HTTPException(status_code=404, detail= "Nenhum provider inativo encontrado") 
-    except Exception as error_500:
-        raise HTTPException(status_code=500, detail=f"Erro desconhecido: {str(error_500)}")
-    return reativacao
+        result = deactivate_provider(db, provider_id)
+        if result is None:
+            raise HTTPException(status_code=404, detail="Nenhum provider encontrado")
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Erro desconhecido: {str(exc)}")
+    return result
+
+
+@router_provider.patch("/{provider_id}", response_model=ProviderOutput)
+def update_provider_route(provider_id: int, payload: ProvidersPatch, db: Session = Depends(get_db)):
+    """Atualiza bio e/ou especialidade de um provider ativo."""
+    if payload.bio is None and payload.specialty is None:
+        raise HTTPException(status_code=400, detail="Deve enviar pelo menos um campo para atualizar")
+    try:
+        provider = update_provider(db, provider_id, payload.bio, payload.specialty)
+        if provider is None:
+            raise HTTPException(status_code=404, detail="Nenhum provider encontrado ou está inativo")
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Erro desconhecido: {str(exc)}")
+    return provider
+
+
+@router_provider.patch("/{provider_id}/reactivate", response_model=ProviderOutput)
+def reactivate_provider_route(provider_id: int, db: Session = Depends(get_db)):
+    """Reativa um provider inativo."""
+    try:
+        provider = reactivate_provider(db, provider_id)
+        if provider is None:
+            raise HTTPException(status_code=404, detail="Nenhum provider inativo encontrado")
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Erro desconhecido: {str(exc)}")
+    return provider

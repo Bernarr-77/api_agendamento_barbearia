@@ -1,26 +1,33 @@
-from pydantic import BaseModel, EmailStr,Field, ConfigDict
+from pydantic import BaseModel, EmailStr, Field, ConfigDict
 from typing import Optional
 from datetime import datetime
+
+
 class UserInput(BaseModel):
     name: str
     email: EmailStr
-    password: str = Field(min_length=6, max_length= 72)
+    password: str = Field(min_length=6, max_length=72)
+
 
 class UserOutput(BaseModel):
-    id: int 
+    id: int
     name: str
     email: str
     role: str
     model_config = ConfigDict(from_attributes=True)
+
 
 class ProviderInput(BaseModel):
     user_id: int
     bio: str
     specialty: str
 
+
 class ProvidersPatch(BaseModel):
     bio: Optional[str] = None
     specialty: Optional[str] = None
+
+
 class ProviderOutput(BaseModel):
     name: str
     id: int
@@ -29,25 +36,42 @@ class ProviderOutput(BaseModel):
     operando: str
     model_config = ConfigDict(from_attributes=True)
 
+
 class ServiceInput(BaseModel):
     provider_id: int
     name: str
     duration_minutes: int
     price: float
 
-class servicePatch(BaseModel):
+
+class ServicePatch(BaseModel):
+    """Renomeado de servicePatch → ServicePatch (PascalCase para classes Pydantic)."""
     name: Optional[str] = None
     duration_minutes: Optional[int] = None
     price: Optional[float] = None
 
+
 class ServiceOutput(BaseModel):
+    """Corrigido: removido campo 'nome' duplicado/incorreto, adicionado 'provider_name'
+    que mapeia a @property 'nome' do modelo Service (nome do provider)."""
     id: int
-    nome: str
+    provider_name: str = Field(alias="nome")
     provider_id: int
     name: str
     duration_minutes: int
     price: float
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
 
 class AgendamentoInput(BaseModel):
     client_id: int
     data_hora_inicio: datetime
+
+
+class AgendamentosOutput(BaseModel):
+    id: int
+    name_usuario: str
+    name_service: str
+    data_hora_inicio: datetime  # Corrigido typo: era 'data_hora_incio'
+    data_hora_fim: datetime
+    model_config = ConfigDict(from_attributes=True)

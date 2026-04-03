@@ -1,156 +1,284 @@
-from app.db.models import User,Provider,Service,StatusProvider, Status, Appointments
+from app.db.models import User, Provider, Service, StatusProvider, Status, Appointments
 from sqlalchemy.orm import Session
-from sqlalchemy import select,delete
+from sqlalchemy import select
 from typing import Optional
-from datetime import timedelta,datetime
-"""
-ROTAS USERS
-==============================================================================
-"""
-def register_user(db: Session ,nome,mail,password,new_role = "CLIENT"):
-        new_user = User(name=nome,email=mail,
-                        hashed_password=password,role=new_role)
-        db.add(new_user)
-        db.commit()
-        db.refresh(new_user)
-        return new_user
+from datetime import timedelta, datetime
 
-def get_user_by_id(db: Session, id:int):
-        usuario = db.get(User, id)
-        if usuario:
-                return usuario
-        else: 
-                return None
-        
-        """
-ROTAS PROVIDERS
-==============================================================================
-"""
-        
-def register_provider(db: Session, id: int, biografia, especialidade, provider_role = "PROVIDER"):
-        user = db.get(User, id)
-        if user:
-                user.role = provider_role
-                db.commit()
-                new_provider = Provider(user_id=id,bio=biografia, specialty=especialidade)
-                db.add(new_provider)
-                db.commit()
-                db.refresh(new_provider)
-                return new_provider
-        else:
-                return None
-def get_all_providers(db: Session, especialidade: Optional[str] = None):
-        query = select(Provider).where(Provider.operando == StatusProvider.ATIVO)
-        if especialidade is not None:
-                query = query.filter(Provider.specialty.ilike(f'%{especialidade}%'))
-                resultados = db.scalars(query).all()
-                if resultados:
-                        return resultados
-                return None
-        resultados = db.scalars(query).all()
-        if resultados:
-                return resultados
+# ==============================================================================
+# USER REPOSITORY
+# ==============================================================================
+
+
+def register_user(
+    db: Session,
+    name: str,
+    email: str,
+    hashed_password: str,
+    role: str = "CLIENT",
+) -> User:
+    """Cria um novo usuário no banco de dados."""
+    new_user = User(
+        name=name,
+        email=email,
+        hashed_password=hashed_password,
+        role=role,
+    )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return new_user
+
+
+def get_user_by_id(db: Session, user_id: int) -> Optional[User]:
+    """Busca um usuário pelo ID."""
+    return db.get(User, user_id)
+
+
+# ==============================================================================
+# PROVIDER REPOSITORY
+# ==============================================================================
+
+
+def register_provider(
+    db: Session,
+    user_id: int,
+    bio: str,
+    specialty: str,
+    provider_role: str = "PROVIDER",
+) -> Optional[Provider]:
+    """Registra um provider a partir de um usuário existente.
+
+    Atualiza o role do usuário para PROVIDER e cria o registro Provider.
+    Retorna None se o usuário não existir.
+    """
+    user = db.get(User, user_id)
+    if user is None:
         return None
 
-def get_provider_by_id(db: Session,id: int):
-        query = select(Provider).where(Provider.operando == StatusProvider.ATIVO, Provider.id == id)
-        resultado = db.scalars(query).first()
-        
-        if resultado:
-                return resultado
+    user.role = provider_role
+    db.commit()
+
+    new_provider = Provider(user_id=user_id, bio=bio, specialty=specialty)
+    db.add(new_provider)
+    db.commit()
+    db.refresh(new_provider)
+    return new_provider
+
+
+def get_all_providers(
+    db: Session,
+    specialty_filter: Optional[str] = None,
+) -> Optional[list[Provider]]:
+    """Busca todos os providers ativos, opcionalmente filtrando por especialidade."""
+    query = select(Provider).where(Provider.operando == StatusProvider.ATIVO)
+
+    if specialty_filter is not None:
+        query = query.filter(Provider.specialty.ilike(f"%{specialty_filter}%"))
+
+    providers = db.scalars(query).all()
+    return providers if providers else None
+
+
+def get_provider_by_id(db: Session, provider_id: int) -> Optional[Provider]:
+    """Busca um provider ativo pelo ID."""
+    query = select(Provider).where(
+        Provider.operando == StatusProvider.ATIVO,
+        Provider.id == provider_id,
+    )
+    return db.scalars(query).first()
+
+
+def reactivate_provider(db: Session, provider_id: int) -> Optional[Provider]:
+    """Reativa um provider inativo."""
+    query = select(Provider).where(
+        Provider.operando == StatusProvider.INATIVO,
+        Provider.id == provider_id,
+    )
+    provider = db.scalars(query).first()
+    if provider is None:
         return None
 
-def reativar_provider(db:Session, id_provider):
-        query = select(Provider).where(Provider.operando == StatusProvider.INATIVO, Provider.id == id_provider)
-        buscar = db.scalars(query).first()
-        if buscar:
-                buscar.operando = StatusProvider.ATIVO
-                db.commit()
-                return buscar
+    provider.operando = StatusProvider.ATIVO
+    db.commit()
+    return provider
+
+
+def deactivate_provider(db: Session, provider_id: int) -> Optional[str]:
+    """Soft-delete: marca o provider como INATIVO."""
+    provider = get_provider_by_id(db, provider_id)
+    if provider is None:
         return None
 
-def delete_provider(db: Session, id):
-        verificador = get_provider_by_id(db,id)
-        if verificador is None:
-                return None
-        verificador.operando = StatusProvider.INATIVO
-        db.commit()
-        return 'Provider inativo com sucesso '
+    provider.operando = StatusProvider.INATIVO
+    db.commit()
+    return "Provider inativado com sucesso"
 
-def atualizar_provider(db:Session, id, biografia: Optional[str] = None, especialidade: Optional[str] = None):
-        verificador = get_provider_by_id(db, id)
-        if verificador is None:
-                return None
-        if biografia is not None:
-                verificador.bio = biografia
-        if especialidade is not None:
-                verificador.specialty = especialidade
-        db.commit()
-        return verificador
-"""
-ROTAS SERVICES
-==============================================================================
-"""
 
-def criar_services(db: Session, id: int, name, duracao, price:float):
-        provedor = get_provider_by_id(db, id)
-        if provedor is None:
-                return None
-        servico = Service(provider_id=id, name=name,
-                          duration_minutes=duracao,price=price)
-        db.add(servico)
-        db.commit()
-        db.refresh(servico)
-        return servico
-
-def buscar_servicos(db: Session, id_provider):
-        query = select(Service).join(Provider).where(Service.provider_id == id_provider, Provider.operando == StatusProvider.ATIVO)
-        resultado = db.scalars(query).all()
-        if resultado:
-                return resultado
+def update_provider(
+    db: Session,
+    provider_id: int,
+    bio: Optional[str] = None,
+    specialty: Optional[str] = None,
+) -> Optional[Provider]:
+    """Atualiza bio e/ou especialidade de um provider ativo."""
+    provider = get_provider_by_id(db, provider_id)
+    if provider is None:
         return None
 
-def buscar_servico_id(db:Session, id_provider, id_servico):
-        query = select(Service).where(Service.provider_id == id_provider, Service.id == id_servico)
-        resultado = db.scalars(query).first()
-        if resultado:
-                return resultado
-        return None
-def atualizar_servico(db: Session, id_provider, id_servico, nome: Optional[str] = None, duracao: Optional[int] = None, preco: Optional[float] = None):
-        verificar_provider = get_provider_by_id(db,id_provider)
-        if verificar_provider is None:
-                return None
-        verificador_servico = buscar_servico_id(db, id_provider,id_servico)
-        if verificador_servico is None:
-                return None
-        
-        if nome is not None:
-                verificador_servico.name = nome
-        if duracao is not None:
-                verificador_servico.duration_minutes = duracao
-        if preco is not None:
-                verificador_servico.price = preco
-        db.commit()
-        return verificador_servico
-        
-"""
-ROTAS AGENDAMENTOS
-==============================================================================
-"""
+    if bio is not None:
+        provider.bio = bio
+    if specialty is not None:
+        provider.specialty = specialty
 
-def criar_agendamento(db:Session, id_servico:int,id_provider:int,hora_inicial:datetime, id_usuario: int, status = 'PENDENTE'):
-        servico = buscar_servico_id(db,id_provider, id_servico)
-        if servico is None:
-                return None
-        hora_final_novo = hora_inicial + timedelta(minutes=servico.duration_minutes)
-        if hora_inicial.hour < 9 or hora_final_novo.hour > 18 or ( hora_final_novo.hour == 18 and hora_final_novo.minute > 0 ): 
-                return 'Estabelecimento fechado'
-        query = select(Appointments).join(Service).filter(Service.provider_id == id_provider, Appointments.data_hora_inicio < hora_final_novo, Appointments.data_hora_fim > hora_inicial)
-        conflito = db.scalars(query).first()
-        if conflito:
-                return 'Horario ja tem pessoa marcada'
-        novo_agendamento = Appointments(client_id = id_usuario, service_id = id_servico, status = status, data_hora_inicio = hora_inicial, data_hora_fim = hora_final_novo)
-        db.add(novo_agendamento)
-        db.commit()
-        db.refresh(novo_agendamento)
-        return novo_agendamento
+    db.commit()
+    return provider
+
+
+# ==============================================================================
+# SERVICE REPOSITORY
+# ==============================================================================
+
+
+def create_service(
+    db: Session,
+    provider_id: int,
+    name: str,
+    duration_minutes: int,
+    price: float,
+) -> Optional[Service]:
+    """Cria um serviço vinculado a um provider ativo. Retorna None se o provider não existir."""
+    provider = get_provider_by_id(db, provider_id)
+    if provider is None:
+        return None
+
+    service = Service(
+        provider_id=provider_id,
+        name=name,
+        duration_minutes=duration_minutes,
+        price=price,
+    )
+    db.add(service)
+    db.commit()
+    db.refresh(service)
+    return service
+
+
+def get_services_by_provider(db: Session, provider_id: int) -> Optional[list[Service]]:
+    """Busca todos os serviços de um provider ativo."""
+    query = (
+        select(Service)
+        .join(Provider)
+        .where(
+            Service.provider_id == provider_id,
+            Provider.operando == StatusProvider.ATIVO,
+        )
+    )
+    services = db.scalars(query).all()
+    return services if services else None
+
+
+def get_service_by_id(
+    db: Session,
+    provider_id: int,
+    service_id: int,
+) -> Optional[Service]:
+    """Busca um serviço específico de um provider."""
+    query = select(Service).where(
+        Service.provider_id == provider_id,
+        Service.id == service_id,
+    )
+    return db.scalars(query).first()
+
+
+def update_service(
+    db: Session,
+    provider_id: int,
+    service_id: int,
+    name: Optional[str] = None,
+    duration_minutes: Optional[int] = None,
+    price: Optional[float] = None,
+) -> Optional[Service]:
+    """Atualiza campos de um serviço. Retorna None se provider ou serviço não forem encontrados."""
+    provider = get_provider_by_id(db, provider_id)
+    if provider is None:
+        return None
+
+    service = get_service_by_id(db, provider_id, service_id)
+    if service is None:
+        return None
+
+    if name is not None:
+        service.name = name
+    if duration_minutes is not None:
+        service.duration_minutes = duration_minutes
+    if price is not None:
+        service.price = price
+
+    db.commit()
+    return service
+
+
+# ==============================================================================
+# APPOINTMENT REPOSITORY
+# ==============================================================================
+
+
+class AppointmentClosedError(ValueError):
+    """Lançado quando o horário está fora do expediente."""
+    pass
+
+
+class AppointmentConflictError(ValueError):
+    """Lançado quando já existe agendamento no horário solicitado."""
+    pass
+
+
+def create_appointment(
+    db: Session,
+    service_id: int,
+    provider_id: int,
+    start_time: datetime,
+    client_id: int,
+    status: str = "PENDENTE",
+) -> Optional[Appointments]:
+    """Cria um agendamento verificando horário de funcionamento e conflitos.
+
+    Raises:
+        AppointmentClosedError: Se o horário está fora do expediente (9h-18h).
+        AppointmentConflictError: Se já existe agendamento conflitante.
+
+    Retorna None se o serviço não for encontrado.
+    """
+    service = get_service_by_id(db, provider_id, service_id)
+    if service is None:
+        return None
+
+    end_time = start_time + timedelta(minutes=service.duration_minutes)
+
+    if start_time.hour < 9 or end_time.hour > 18 or (end_time.hour == 18 and end_time.minute > 0):
+        raise AppointmentClosedError("Estabelecimento fechado neste horário")
+
+    conflict_query = (
+        select(Appointments)
+        .join(Service)
+        .filter(
+            Service.provider_id == provider_id,
+            Appointments.data_hora_inicio < end_time,
+            Appointments.data_hora_fim > start_time,
+        )
+    )
+    conflict = db.scalars(conflict_query).first()
+    if conflict:
+        raise AppointmentConflictError("Horário já possui agendamento marcado")
+
+    new_appointment = Appointments(
+        client_id=client_id,
+        service_id=service_id,
+        status=status,
+        data_hora_inicio=start_time,
+        data_hora_fim=end_time,
+    )
+    db.add(new_appointment)
+    db.commit()
+    db.refresh(new_appointment)
+    return new_appointment

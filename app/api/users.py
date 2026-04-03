@@ -1,31 +1,42 @@
 from fastapi import APIRouter, HTTPException, Depends
-from app.core.schemas import UserInput,UserOutput
-from app.core.security import hash_password
-from app.db.repositorio import register_user,get_user_by_id
-from app.db.session import get_db
+from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 
-router_user = APIRouter()
+from app.core.schemas import UserInput, UserOutput
+from app.core.security import hash_password
+from app.db.repositorio import register_user, get_user_by_id
+from app.db.session import get_db
 
-@router_user.post("/register_users/", response_model=UserOutput)
-def user_register(payload: UserInput, db = Depends(get_db)):
+router_user = APIRouter(prefix="/users", tags=["Users"])
+
+
+@router_user.post("/", response_model=UserOutput)
+def register_user_route(payload: UserInput, db: Session = Depends(get_db)):
+    """Registra um novo usuário."""
     hashed = hash_password(payload.password)
     try:
-        retorno = register_user(db, payload.name, payload.email,hashed)
+        new_user = register_user(db, payload.name, payload.email, hashed)
+    except HTTPException:
+        raise
     except IntegrityError:
-        raise HTTPException(status_code= 409, detail= "Email já existente")
-    except Exception as error_500:
-        raise HTTPException(status_code=500, detail= f"Erro desconhecido: {str(error_500)}")
-    return retorno
+        raise HTTPException(status_code=409, detail="Email já existente")
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Erro desconhecido: {str(exc)}")
+    return new_user
 
-@router_user.get("/buscar_usuario/{id}",response_model=UserOutput)
-def get_usuarios(id:int, db = Depends(get_db)):
-    if id is None:
-        raise HTTPException(status_code=400, detail="Você precisa mandar pelo menos um dado.")
+
+@router_user.get("/{user_id}", response_model=UserOutput)
+def get_user_by_id_route(user_id: int, db: Session = Depends(get_db)):
+    """Busca um usuário pelo ID.
+
+    Removido: 'if id is None' — FastAPI já rejeita antes de entrar na função.
+    """
     try:
-        usuario = get_user_by_id(db,id)
-    except Exception as error_500:
-        raise HTTPException(status_code=500, detail= f"Erro desconhecido: {str(error_500)}")
-    if usuario is None:
-        raise HTTPException(status_code= 404, detail="Usuario não encontrado")
-    return usuario
+        user = get_user_by_id(db, user_id)
+        if user is None:
+            raise HTTPException(status_code=404, detail="Usuário não encontrado")
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Erro desconhecido: {str(exc)}")
+    return user
