@@ -10,6 +10,8 @@ app = Celery('tasks_barbearia',
 app.conf.update(
     result_expires=3600,
 )
+app.conf.timezone = 'America/Sao_Paulo'
+app.conf.enable_utc = False
 
 
 # celery -A app.workers.celery worker --loglevel=info --pool=solo

@@ -2,8 +2,9 @@ from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 from app.core.schemas import AgendamentoInput, AgendamentosOutput
 from app.db.session import get_db
-from app.workers.task import confirmacao_email
+from app.workers.task import confirmacao_email, enviar_email_lembrete, enviar_email_lembrete_2h, enviar_email_de_cancelamento
 from zoneinfo import ZoneInfo
+from datetime import timedelta,datetime
 from app.db.repositorio import (
     create_appointment,
     AppointmentClosedError,
@@ -12,7 +13,8 @@ from app.db.repositorio import (
     get_appointment_by_id,
     get_appointments_by_provider,
     patch_appointment,
-    get_user_by_id
+    get_user_by_id,
+    confirmar_agendamento
 )
 
 router_agendamentos = APIRouter(prefix="/appointments", tags=["Appointments"])
@@ -26,7 +28,6 @@ def create_appointment_route(
 ):
     """Cria um novo agendamento verificando horário e conflitos.
     """
-    data_fuso_sp = payload.data_hora_inicio.astimezone(ZoneInfo("America/Sao_Paulo"))
     try:
         appointment = create_appointment(
             db, service_id, provider_id, payload.data_hora_inicio, payload.client_id)
@@ -43,8 +44,24 @@ def create_appointment_route(
         raise HTTPException(status_code=409, detail="Horário já possui agendamento marcado")
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Erro desconhecido: {str(exc)}")
-    inicio_formatado = appointment.data_hora_inicio.astimezone(ZoneInfo("America/Sao_Paulo")).strftime("%d/%m/%Y às %H:%M")
-    fim_formatado = appointment.data_hora_fim.astimezone(ZoneInfo("America/Sao_Paulo")).strftime("%d/%m/%Y às %H:%M")
+
+    inicio_sp = appointment.data_hora_inicio.astimezone(ZoneInfo("America/Sao_Paulo"))
+    fim_sp = appointment.data_hora_fim.astimezone(ZoneInfo("America/Sao_Paulo"))
+
+    inicio_formatado = inicio_sp.strftime("%d/%m/%Y às %H:%M")
+    fim_formatado = fim_sp.strftime("%d/%m/%Y às %H:%M")
+
+    aviso_um_dia_antes = inicio_sp - timedelta(days=1)
+    aviso_duas_hora_antes = inicio_sp - timedelta(hours=2)
+
+    if aviso_um_dia_antes > datetime.now(tz=ZoneInfo("America/Sao_Paulo")):
+        enviar_email_lembrete.apply_async(args=[verificator_user.email, inicio_formatado, fim_formatado, appointment.id, payload.client_id], eta=aviso_um_dia_antes)
+        momento_expiracao = datetime.now(tz=ZoneInfo("America/Sao_Paulo")) + timedelta(hours=24)
+        enviar_email_de_cancelamento.apply_async(args=[appointment.id, payload.client_id], eta=momento_expiracao)
+    else:
+        confirmar_agendamento(db, appointment.id, payload.client_id)
+    if aviso_duas_hora_antes > datetime.now(tz=ZoneInfo("America/Sao_Paulo")):
+        enviar_email_lembrete_2h.apply_async(args=[verificator_user.email, inicio_formatado, fim_formatado, appointment.id], eta=aviso_duas_hora_antes)
     confirmacao_email.delay(verificator_user.email, inicio_formatado, fim_formatado)
     return appointment
 
@@ -80,3 +97,14 @@ def cancel_appointment(appointment_id: int, client_id:int, db: Session = Depends
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Erro desconhecido: {str(exc)}")
     return soft_delete
+
+@router_agendamentos.get("/confirmar/{appointment_id}/{client_id}", response_model=AgendamentosOutput)
+def confirmar_agendamento_route(appointment_id: int, client_id: int, db: Session = Depends(get_db)):    
+    """Confirma o agendamento pelo botão do e-mail"""
+    try:
+        confirmacao = confirmar_agendamento(db, appointment_id, client_id)
+    except NoAppointmentNeeded:
+        raise HTTPException(status_code=404, detail="Não existe registro desse agendamento")
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Erro desconhecido: {str(exc)}")
+    return confirmacao

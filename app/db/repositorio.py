@@ -319,3 +319,27 @@ def patch_appointment(
     search_by_id.status = Status.CANCELADO
     db.commit()
     return search_by_id
+
+def confirmar_agendamento(
+    db:Session,
+    appointment_id: int,
+    client_id: int
+) -> Optional[Appointments]:
+    search_by_id = get_appointment_by_id(db, appointment_id,client_id)
+    search_by_id.status = Status.CONFIRMADO
+    db.commit()
+    return search_by_id
+
+def cancel_appointment(
+    db: Session,
+    appointment_id: int,
+    client_id: int):
+    search_by_id = get_appointment_by_id(db, appointment_id,client_id)
+    if search_by_id is None:
+        raise NoAppointmentNeeded("Não existe agendamento com esse ID")
+    if search_by_id.status == Status.PENDENTE:
+        search_by_id.status = Status.CANCELADO
+        db.commit()
+        db.refresh(search_by_id)
+        return search_by_id.status
+    return None
