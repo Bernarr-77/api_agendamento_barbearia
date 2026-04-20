@@ -26,6 +26,7 @@ class User(Base):
 
     provider: Mapped["Provider"] = relationship(back_populates="user")
     agendamento: Mapped[list['Appointments']] = relationship(back_populates='agendamento_usuario')
+    usuario_token: Mapped[list['RefreshToken']] = relationship(back_populates='token_usuario')
 
 class Provider(Base):
     __tablename__ = "providers"
@@ -77,3 +78,14 @@ class Appointments(Base):
     @property
     def name_provider(self):
         return self.agendamento_servico.service_provider.user.name
+
+
+class RefreshToken(Base):
+    __tablename__ = "tokens"
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    token: Mapped[str] = mapped_column(nullable=False)
+    user_id: Mapped[int] = mapped_column(ForeignKey("usuarios.id",ondelete='CASCADE'))
+    expire_at: Mapped[datetime] = mapped_column(nullable=False)
+    revoked: Mapped[bool] = mapped_column(nullable=False)
+
+    token_usuario: Mapped['User'] = relationship(back_populates='usuario_token')
