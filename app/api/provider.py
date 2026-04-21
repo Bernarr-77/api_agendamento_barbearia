@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Path, Query
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from typing import Optional, List
@@ -34,7 +34,7 @@ def register_provider_route(payload: ProviderInput, db: Session = Depends(get_db
 
 
 @router_provider.get("/", response_model=List[ProviderOutput])
-def get_all_providers_route(specialty: Optional[str] = None, db: Session = Depends(get_db)):
+def get_all_providers_route(specialty: Optional[str] = Query(None, min_length=1, max_length=100), db: Session = Depends(get_db)):
     """Busca todos os providers ativos, com filtro opcional por especialidade."""
     try:
         providers = get_all_providers(db, specialty)
@@ -48,7 +48,7 @@ def get_all_providers_route(specialty: Optional[str] = None, db: Session = Depen
 
 
 @router_provider.get("/{provider_id}", response_model=ProviderOutput)
-def get_provider_by_id_route(provider_id: int, db: Session = Depends(get_db)):
+def get_provider_by_id_route(provider_id: int = Path(..., gt=0, le=2147483647), db: Session = Depends(get_db)):
     """Busca um provider ativo pelo ID."""
     try:
         provider = get_provider_by_id(db, provider_id)
@@ -62,7 +62,7 @@ def get_provider_by_id_route(provider_id: int, db: Session = Depends(get_db)):
 
 
 @router_provider.delete("/{provider_id}")
-def deactivate_provider_route(provider_id: int, db: Session = Depends(get_db)):
+def deactivate_provider_route(provider_id: int = Path(..., gt=0, le=2147483647), db: Session = Depends(get_db)):
     """Soft-delete: marca o provider como INATIVO."""
     try:
         result = deactivate_provider(db, provider_id)
@@ -76,7 +76,7 @@ def deactivate_provider_route(provider_id: int, db: Session = Depends(get_db)):
 
 
 @router_provider.patch("/{provider_id}", response_model=ProviderOutput)
-def update_provider_route(provider_id: int, payload: ProvidersPatch, db: Session = Depends(get_db)):
+def update_provider_route(provider_id: int = Path(..., gt=0, le=2147483647), payload: ProvidersPatch = None, db: Session = Depends(get_db)):
     """Atualiza bio e/ou especialidade de um provider ativo."""
     if payload.bio is None and payload.specialty is None:
         raise HTTPException(status_code=400, detail="Deve enviar pelo menos um campo para atualizar")
@@ -92,7 +92,7 @@ def update_provider_route(provider_id: int, payload: ProvidersPatch, db: Session
 
 
 @router_provider.patch("/{provider_id}/reactivate", response_model=ProviderOutput)
-def reactivate_provider_route(provider_id: int, db: Session = Depends(get_db)):
+def reactivate_provider_route(provider_id: int = Path(..., gt=0, le=2147483647), db: Session = Depends(get_db)):
     """Reativa um provider inativo."""
     try:
         provider = reactivate_provider(db, provider_id)

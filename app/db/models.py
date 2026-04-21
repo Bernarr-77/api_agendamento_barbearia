@@ -32,8 +32,8 @@ class Provider(Base):
     __tablename__ = "providers"
     id: Mapped[int] = mapped_column(primary_key= True, autoincrement= True)
     user_id: Mapped[int] = mapped_column(ForeignKey("usuarios.id"))
-    bio: Mapped[str] = mapped_column(nullable=False)
-    specialty: Mapped[str] = mapped_column(nullable=False)
+    bio: Mapped[str] = mapped_column(String(500), nullable=False)
+    specialty: Mapped[str] = mapped_column(String(100), nullable=False)
     operando: Mapped[StatusProvider] = mapped_column(Enum(StatusProvider),nullable=False,server_default='ATIVO')
 
     user: Mapped["User"]= relationship(back_populates="provider")
@@ -46,7 +46,7 @@ class Service(Base):
     __tablename__ = "servicos"
     id: Mapped[int] = mapped_column(primary_key= True, autoincrement= True)
     provider_id: Mapped[int] = mapped_column(ForeignKey("providers.id"))
-    name: Mapped[str] = mapped_column(nullable=False)
+    name: Mapped[str] = mapped_column(String(100), nullable=False)
     duration_minutes: Mapped[int] = mapped_column(nullable=False)
     price: Mapped[float] = mapped_column(nullable=False)
 
@@ -83,7 +83,7 @@ class Appointments(Base):
 class RefreshToken(Base):
     __tablename__ = "tokens"
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    token: Mapped[str] = mapped_column(nullable=False)
+    token: Mapped[str] = mapped_column(String(500), nullable=False)
     user_id: Mapped[int] = mapped_column(ForeignKey("usuarios.id",ondelete='CASCADE'))
     expire_at: Mapped[datetime] = mapped_column(nullable=False)
     revoked: Mapped[bool] = mapped_column(nullable=False)

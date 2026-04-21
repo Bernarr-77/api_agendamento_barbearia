@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Path
 from sqlalchemy.orm import Session
 from app.core.schemas import AgendamentoInput, AgendamentosOutput
 from app.db.session import get_db
@@ -21,9 +21,9 @@ router_agendamentos = APIRouter(prefix="/appointments", tags=["Appointments"])
 
 @router_agendamentos.post("/{service_id}/{provider_id}", response_model=AgendamentosOutput)
 def create_appointment_route(
-    service_id: int,
-    provider_id: int,
     payload: AgendamentoInput,
+    service_id: int = Path(..., gt=0, le=2147483647),
+    provider_id: int = Path(..., gt=0, le=2147483647),
     db: Session = Depends(get_db),
 ):
     """Cria um novo agendamento verificando horário e conflitos.
@@ -66,7 +66,7 @@ def create_appointment_route(
     return appointment
 
 @router_agendamentos.get("/{appointment_id}/{client_id}", response_model=AgendamentosOutput)
-def get_appointment_route(appointment_id: int, client_id: int, db: Session = Depends(get_db)):
+def get_appointment_route(appointment_id: int = Path(..., gt=0, le=2147483647), client_id: int = Path(..., gt=0, le=2147483647), db: Session = Depends(get_db)):
     """Busca agendamentos pelo Id"""
     try:
         result_get = get_appointment_by_id(db, appointment_id, client_id)
@@ -77,7 +77,7 @@ def get_appointment_route(appointment_id: int, client_id: int, db: Session = Dep
     return result_get
 
 @router_agendamentos.get("/{provider_id}",response_model=list[AgendamentosOutput])
-def get_appointments_all(provider_id: int, db: Session = Depends(get_db)):
+def get_appointments_all(provider_id: int = Path(..., gt=0, le=2147483647), db: Session = Depends(get_db)):
     """Busca agendamentos pelo provider"""
     try:
         result_get = get_appointments_by_provider(db,provider_id)
@@ -88,7 +88,7 @@ def get_appointments_all(provider_id: int, db: Session = Depends(get_db)):
     return result_get
 
 @router_agendamentos.delete("/{appointment_id}/{client_id}",response_model=AgendamentosOutput)
-def cancel_appointment(appointment_id: int, client_id:int, db: Session = Depends(get_db)):
+def cancel_appointment(appointment_id: int = Path(..., gt=0, le=2147483647), client_id: int = Path(..., gt=0, le=2147483647), db: Session = Depends(get_db)):
     """Cancela o agendamento alterando o status"""
     try:
         soft_delete = patch_appointment(db,appointment_id, client_id)
@@ -99,7 +99,7 @@ def cancel_appointment(appointment_id: int, client_id:int, db: Session = Depends
     return soft_delete
 
 @router_agendamentos.get("/confirmar/{appointment_id}/{client_id}", response_model=AgendamentosOutput)
-def confirmar_agendamento_route(appointment_id: int, client_id: int, db: Session = Depends(get_db)):    
+def confirmar_agendamento_route(appointment_id: int = Path(..., gt=0, le=2147483647), client_id: int = Path(..., gt=0, le=2147483647), db: Session = Depends(get_db)):    
     """Confirma o agendamento pelo botão do e-mail"""
     try:
         confirmacao = confirmar_agendamento(db, appointment_id, client_id)

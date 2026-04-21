@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Path
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from typing import List
@@ -34,7 +34,7 @@ def create_service_route(payload: ServiceInput, db: Session = Depends(get_db)):
 
 
 @router_service.get("/{provider_id}", response_model=List[ServiceOutput])
-def get_services_route(provider_id: int, db: Session = Depends(get_db)):
+def get_services_route(provider_id: int = Path(..., gt=0, le=2147483647), db: Session = Depends(get_db)):
     """Busca todos os serviços de um provider ativo."""
     try:
         provider = get_provider_by_id(db, provider_id)
@@ -52,9 +52,9 @@ def get_services_route(provider_id: int, db: Session = Depends(get_db)):
 
 @router_service.patch("/{provider_id}/{service_id}", response_model=ServiceOutput)
 def update_service_route(
-    provider_id: int,
-    service_id: int,
-    payload: ServicePatch,
+    provider_id: int = Path(..., gt=0, le=2147483647),
+    service_id: int = Path(..., gt=0, le=2147483647),
+    payload: ServicePatch = None,
     db: Session = Depends(get_db),
 ):
     """Atualiza campos de um serviço existente."""

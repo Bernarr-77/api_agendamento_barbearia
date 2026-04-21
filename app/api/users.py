@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Path, Query
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 
@@ -26,7 +26,7 @@ def register_user_route(payload: UserInput, db: Session = Depends(get_db)):
 
 
 @router_user.get("/{user_id}", response_model=UserOutput)
-def get_user_by_id_route(user_id: int, db: Session = Depends(get_db)):
+def get_user_by_id_route(user_id: int = Path(..., gt=0, le=2147483647), db: Session = Depends(get_db)):
     """Busca um usuário pelo ID."""
     try:
         user = get_user_by_id(db, user_id)
@@ -39,7 +39,7 @@ def get_user_by_id_route(user_id: int, db: Session = Depends(get_db)):
     return user
 
 @router_user.get("/", response_model=list[UserOutput])
-def get_user_name(name: str, db: Session = Depends(get_db)):
+def get_user_name(name: str = Query(..., min_length=1, max_length=100), db: Session = Depends(get_db)):
     """Busca usuários pelo nome."""
     try:
         search_by_name = get_user_by_name(db, name)
