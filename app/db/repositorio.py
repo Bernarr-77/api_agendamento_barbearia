@@ -1,8 +1,8 @@
-from app.db.models import User, Provider, Service, StatusProvider, Status, Appointments
+from app.db.models import User, Provider, Service, StatusProvider, Status, Appointments,UserRefreshToken
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 from typing import Optional
-from datetime import timedelta, datetime
+from datetime import timedelta, datetime,timezone
 
 
 
@@ -340,7 +340,7 @@ def confirmar_agendamento(
 def cancel_appointment(
     db: Session,
     appointment_id: int,
-    client_id: int):
+    client_id: int) -> Optional[Appointments]:
     search_by_id = get_appointment_by_id(db, appointment_id,client_id)
     if search_by_id is None:
         raise NoAppointmentNeeded("Não existe agendamento com esse ID")
@@ -350,3 +350,14 @@ def cancel_appointment(
         db.refresh(search_by_id)
         return search_by_id.status
     return None
+
+# ==============================================================================
+# SECURITY REPOSITORY
+# ==============================================================================
+
+def get_valid_token(
+    db: Session,
+    token_str:str) -> Optional[UserRefreshToken]:
+    query = select(UserRefreshToken).where(UserRefreshToken.token == token_str, UserRefreshToken.revoked == False, UserRefreshToken.expire_at > datetime.now(timezone.utc))
+    search_token = db.scalars(query).first()
+    return search_token
