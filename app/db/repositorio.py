@@ -361,3 +361,23 @@ def get_valid_token(
     query = select(UserRefreshToken).where(UserRefreshToken.token == token_str, UserRefreshToken.revoked == False, UserRefreshToken.expire_at > datetime.now(timezone.utc))
     search_token = db.scalars(query).first()
     return search_token
+
+def add_token_in_db(
+    db:Session,
+    token: str,
+    expire: datetime,
+    id_user: int
+) -> Optional[UserRefreshToken]:
+
+    verify_user_id = get_user_by_id(db, id_user)
+    if verify_user_id is None:
+        return None
+    new_token = UserRefreshToken(
+        token=token,
+        expire_at=expire,
+        user_id= id_user
+    )
+    db.add(new_token)
+    db.commit()
+    db.refresh(new_token)
+    return new_token
