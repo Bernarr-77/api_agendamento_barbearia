@@ -40,6 +40,10 @@ def get_user_by_name(db: Session, name: str) -> list[User]:
     """Busca usuários pelo nome (case-insensitive)."""
     query = select(User).where(User.name.ilike(f"%{name}%"))
     return list(db.scalars(query).all())
+
+def get_user_by_email(db: Session, email: str) -> Optional[User]:
+    query = select(User).where(User.email == email)
+    return db.scalars(query).first()
 # ==============================================================================
 # PROVIDER REPOSITORY
 # ==============================================================================

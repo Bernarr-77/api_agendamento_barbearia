@@ -1,4 +1,5 @@
-from pydantic import BaseModel, EmailStr, Field, ConfigDict, str_strip,field_validator
+import re
+from pydantic import BaseModel, EmailStr, Field, ConfigDict, field_validator
 from typing import Optional
 from datetime import datetime
 
@@ -14,6 +15,13 @@ class UserInput(BaseModel):
         if isinstance(v, str):
             return re.sub(r'\s{2,}', ' ', v)
         return v
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str = Field(min_length=6, max_length=72)
+
+class RefreshTokenInput(BaseModel):
+    refresh_token: str
 
 class UserOutput(BaseModel):
     id: int

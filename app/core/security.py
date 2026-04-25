@@ -3,7 +3,7 @@ from jose import jwt
 from datetime import datetime, timedelta, timezone
 from dotenv import load_dotenv
 import os
-from db.repositorio import add_token_in_db
+from app.db.repositorio import add_token_in_db
 from sqlalchemy.orm import Session
 
 load_dotenv()
@@ -52,3 +52,4 @@ def create_refresh_token(data: dict, db: Session):
     add_token_in_db(db, encoded_jwt, expire, data.get("id"))
     return encoded_jwt
 
+    

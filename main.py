@@ -3,6 +3,7 @@ from app.api.users import router_user
 from app.api.provider import router_provider
 from app.api.services import router_service
 from app.api.agendamentos import router_agendamentos
+from app.api.auth import router
 
 app = FastAPI(title="Agendamento API", version="1.0.0")
 
@@ -10,3 +11,4 @@ app.include_router(router_user)
 app.include_router(router_provider)
 app.include_router(router_service)
 app.include_router(router_agendamentos)
+app.include_router(router)
