@@ -52,4 +52,5 @@ def create_refresh_token(data: dict, db: Session):
     add_token_in_db(db, encoded_jwt, expire, data.get("id"))
     return encoded_jwt
 
+
     

@@ -5,6 +5,7 @@ from app.db.session import get_db
 from app.workers.task import confirmacao_email, enviar_email_lembrete, enviar_email_lembrete_2h, enviar_email_de_cancelamento
 from zoneinfo import ZoneInfo
 from datetime import timedelta,datetime
+from app.api.auth import get_current_user, require_provider
 from app.db.repositorio import (
     create_appointment,
     AppointmentClosedError,
@@ -17,7 +18,9 @@ from app.db.repositorio import (
     confirmar_agendamento
 )
 
-router_agendamentos = APIRouter(prefix="/appointments", tags=["Appointments"])
+router_agendamentos = APIRouter(prefix="/appointments", 
+                                tags=["Appointments"],
+                                dependencies=[Depends(get_current_user)])
 
 @router_agendamentos.post("/{service_id}/{provider_id}", response_model=AgendamentosOutput)
 def create_appointment_route(
@@ -77,7 +80,7 @@ def get_appointment_route(appointment_id: int = Path(..., gt=0, le=2147483647), 
     return result_get
 
 @router_agendamentos.get("/{provider_id}",response_model=list[AgendamentosOutput])
-def get_appointments_all(provider_id: int = Path(..., gt=0, le=2147483647), db: Session = Depends(get_db)):
+def get_appointments_all(provider_id: int = Path(..., gt=0, le=2147483647), db: Session = Depends(get_db), provedor = Depends(require_provider)):
     """Busca agendamentos pelo provider"""
     try:
         result_get = get_appointments_by_provider(db,provider_id)
@@ -88,7 +91,7 @@ def get_appointments_all(provider_id: int = Path(..., gt=0, le=2147483647), db: 
     return result_get
 
 @router_agendamentos.delete("/{appointment_id}/{client_id}",response_model=AgendamentosOutput)
-def cancel_appointment(appointment_id: int = Path(..., gt=0, le=2147483647), client_id: int = Path(..., gt=0, le=2147483647), db: Session = Depends(get_db)):
+def cancel_appointment(appointment_id: int = Path(..., gt=0, le=2147483647), client_id: int = Path(..., gt=0, le=2147483647), db: Session = Depends(get_db), provedor = Depends(require_provider)):
     """Cancela o agendamento alterando o status"""
     try:
         soft_delete = patch_appointment(db,appointment_id, client_id)

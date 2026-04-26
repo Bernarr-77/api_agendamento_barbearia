@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Depends, Path, Query
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from typing import Optional, List
-
+from app.api.auth import require_provider
 from app.core.schemas import ProviderInput, ProviderOutput, ProvidersPatch
 from app.db.repositorio import (
     register_provider,
@@ -14,7 +14,9 @@ from app.db.repositorio import (
 )
 from app.db.session import get_db
 
-router_provider = APIRouter(prefix="/providers", tags=["Providers"])
+router_provider = APIRouter(prefix="/providers", 
+                            tags=["Providers"],
+                            dependencies=[Depends(require_provider)])
 
 
 @router_provider.post("/", response_model=ProviderOutput)
