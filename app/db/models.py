@@ -1,6 +1,6 @@
 from app.db.session import Base
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import String, Enum, ForeignKey
+from sqlalchemy import String, Enum, ForeignKey, DateTime
 import enum
 from datetime import datetime
 class StatusUsuario(enum.Enum):
@@ -15,6 +15,10 @@ class StatusProvider(enum.Enum):
     ATIVO = 'ATIVO'
     INATIVO = 'INATIVO'
 
+class ServiceCategory(enum.Enum):
+    ODONTOLOGICO = "ODONTOLOGICO"
+    ESTETICO = 'ESTETICO'
+
 class User(Base):
     __tablename__ = "usuarios"
     id: Mapped[int] = mapped_column(primary_key=True,autoincrement=True)
@@ -23,6 +27,9 @@ class User(Base):
     hashed_password: Mapped[str] = mapped_column(nullable=False)
     role: Mapped[StatusUsuario] = mapped_column(Enum(StatusUsuario),nullable=False)
     created_at:Mapped[datetime] = mapped_column(default=datetime.now)
+    profile_picture: Mapped[str] = mapped_column(String(255), nullable=True)
+    reset_password_code: Mapped[str] = mapped_column(String(6), nullable=True)
+    reset_password_expire: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
 
     provider: Mapped["Provider"] = relationship(back_populates="user")
     agendamento: Mapped[list['Appointments']] = relationship(back_populates='agendamento_usuario')
@@ -49,6 +56,7 @@ class Service(Base):
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     duration_minutes: Mapped[int] = mapped_column(nullable=False)
     price: Mapped[float] = mapped_column(nullable=False)
+    category: Mapped[ServiceCategory] = mapped_column(Enum(ServiceCategory), nullable=False)
 
     service_provider: Mapped["Provider"] = relationship(back_populates='service')
     servicos_agendados: Mapped[list['Appointments']] = relationship(back_populates='agendamento_servico',cascade='all, delete-orphan')

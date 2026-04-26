@@ -677,3 +677,60 @@ def enviar_email_de_cancelamento(self, agendamento_id: int, client_id: int):
     except Exception as exc:
         raise self.retry(exc=exc)
 
+
+@app.task(name="enviar_email_recuperacao",
+        bind=True,
+        max_retries=5,
+        default_retry_delay=300)
+def enviar_email_recuperacao(self, email_destino: str, codigo: str):
+    remetente = os.getenv("EMAIL_SENDER")
+    senha = os.getenv("EMAIL_PASSWORD")
+    servidor_smtp = os.getenv("SMTP_SERVER")
+    porta_smtp = int(os.getenv("SMTP_PORT"))
+
+    msg = EmailMessage()
+    msg['Subject'] = "🔐 Seu código de recuperação de senha"
+    msg['From'] = remetente
+    msg['To'] = email_destino
+
+    msg.set_content(f"Seu código de recuperação é: {codigo}. Ele expira em 10 minutos.")
+
+    html_template = f"""
+    <!DOCTYPE html>
+    <html lang="pt-BR">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="margin:0; padding:0; background-color:#0f0f0f; font-family: Arial, sans-serif;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#0f0f0f; padding: 40px 20px;">
+            <tr>
+                <td align="center">
+                    <table width="600" style="background:#1a1a1a; border-radius:16px; padding:40px; border:1px solid #2e2e2e;">
+                        <tr>
+                            <td align="center">
+                                <h1 style="color:#daa520; margin-bottom:20px;">Recuperação de Senha</h1>
+                                <p style="color:#cccccc; font-size:16px;">Você solicitou a alteração da sua senha. Utilize o código abaixo para prosseguir:</p>
+                                <div style="background:#111; border:1px dashed #daa520; padding:20px; margin:30px 0; border-radius:8px;">
+                                    <span style="color:#daa520; font-size:32px; font-weight:bold; letter-spacing:8px;">{codigo}</span>
+                                </div>
+                                <p style="color:#888; font-size:14px;">Este código expira em 10 minutos. Se você não solicitou esta alteração, ignore este e-mail.</p>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </body>
+    </html>
+    """
+    msg.add_alternative(html_template, subtype='html')
+
+    try:
+        with smtplib.SMTP(servidor_smtp, porta_smtp) as server:
+            server.starttls()
+            server.login(remetente, senha)
+            server.send_message(msg)
+    except Exception as exc:
+        raise self.retry(exc=exc)
+

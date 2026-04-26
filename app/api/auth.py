@@ -1,11 +1,19 @@
 from app.db.session import get_db
 from fastapi import APIRouter, Depends, HTTPException,status
-from app.core.schemas import UserLogin,RefreshTokenInput
+from app.core.schemas import UserLogin, RefreshTokenInput, ForgotPasswordInput, ResetPasswordInput
 from sqlalchemy.orm import Session
-from app.db.repositorio import get_valid_token, get_user_by_email,get_user_by_id
-from app.core.security import verify_password,create_access_token,create_refresh_token, verify_token
+from app.db.repositorio import (
+    get_valid_token, get_user_by_email, get_user_by_id, 
+    save_reset_code, reset_user_password
+)
+from app.core.security import (
+    verify_password, create_access_token, create_refresh_token, 
+    verify_token, gerar_codigo_recuperacao, hash_password
+)
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from app.db.models import User
+from app.workers.task import enviar_email_recuperacao
+from datetime import datetime, timedelta, timezone
 
 router_auth = APIRouter(tags=["Oauth"])
 
@@ -68,6 +76,44 @@ def test_auth(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)
         raise HTTPException(status_code=401, detail="Token inválido ou expirado")
     user = get_user_by_id(db, int(user_id))
     return {"message": "Autenticação funcionando!", "user": user}
+
+
+@router_auth.post("/forgot-password")
+def forgot_password(input_data: ForgotPasswordInput, db: Session = Depends(get_db)):
+    user = get_user_by_email(db, input_data.email)
+    if not user:
+        # Por segurança, não confirmamos se o e-mail existe ou não
+        return {"message": "Se o e-mail estiver cadastrado, um código foi enviado."}
+    
+    codigo = gerar_codigo_recuperacao()
+    expiracao = datetime.now(timezone.utc) + timedelta(minutes=10)
+    
+    save_reset_code(db, input_data.email, codigo, expiracao)
+    
+    # Chama o Celery para enviar o e-mail
+    enviar_email_recuperacao.delay(input_data.email, codigo)
+    
+    return {"message": "Se o e-mail estiver cadastrado, um código foi enviado."}
+
+
+@router_auth.post("/reset-password")
+def reset_password(input_data: ResetPasswordInput, db: Session = Depends(get_db)):
+    hashed_password = hash_password(input_data.new_password)
+    
+    success = reset_user_password(
+        db, 
+        input_data.email, 
+        input_data.code, 
+        hashed_password
+    )
+    
+    if not success:
+        raise HTTPException(
+            status_code=400, 
+            detail="Código inválido, expirado ou e-mail incorreto."
+        )
+    
+    return {"message": "Senha alterada com sucesso!"}
 
     
 

@@ -5,6 +5,8 @@ from dotenv import load_dotenv
 import os
 from app.db.repositorio import add_token_in_db
 from sqlalchemy.orm import Session
+import random
+import string
 
 load_dotenv()
 secret_key = os.getenv("SECRET_KEY")
@@ -54,6 +56,11 @@ def create_refresh_token(data: dict, db: Session):
     encoded_jwt = jwt.encode(to_encode,secret_key, algorithm=algorithm)
     add_token_in_db(db, encoded_jwt, expire, int(data.get("sub")))
     return encoded_jwt
+
+
+
+def gerar_codigo_recuperacao() -> str:
+    return ''.join(random.choices(string.digits, k=6))
 
 
     

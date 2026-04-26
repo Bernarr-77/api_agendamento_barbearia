@@ -1,12 +1,21 @@
 from fastapi import FastAPI
+import os
 from app.api.users import router_user
 from app.api.provider import router_provider
 from app.api.services import router_service
 from app.api.agendamentos import router_agendamentos
 from app.api.auth import router_auth
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 app = FastAPI(title="Agendamento API", version="1.0.0")
+
+# Cria a pasta uploads automaticamente caso ela não exista
+os.makedirs("uploads", exist_ok=True)
+
+# Monta a pasta estática para o Front-end conseguir ler as imagens
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+
 origins = [
     "http://localhost",
     "http://localhost:3000",   

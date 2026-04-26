@@ -22,7 +22,7 @@ def create_service_route(payload: ServiceInput, db: Session = Depends(get_db)):
     """Cria um novo serviço vinculado a um provider ativo."""
     try:
         service = create_service(
-            db, payload.provider_id, payload.name, payload.duration_minutes, payload.price
+            db, payload.provider_id, payload.name, payload.duration_minutes, payload.price, payload.category
         )
         if service is None:
             raise HTTPException(status_code=404, detail="Não existe provider com esse ID")
@@ -62,7 +62,7 @@ def update_service_route(
     """Atualiza campos de um serviço existente."""
     try:
         service = update_service(
-            db, provider_id, service_id, payload.name, payload.duration_minutes, payload.price
+            db, provider_id, service_id, payload.name, payload.duration_minutes, payload.price, payload.category
         )
         if service is None:
             raise HTTPException(

@@ -5,8 +5,8 @@ from datetime import datetime
 
 
 class UserInput(BaseModel):
-    name: str = Field(min_length=3,max_length=30)
-    email: EmailStr
+    name: str = Field(min_length=3, max_length=100)
+    email: EmailStr = Field(max_length=100)
     password: str = Field(min_length=6, max_length=72)
     model_config = ConfigDict(str_strip_whitespace=True)
     @field_validator('name', mode='before')
@@ -17,17 +17,18 @@ class UserInput(BaseModel):
         return v
 
 class UserLogin(BaseModel):
-    email: EmailStr
+    email: EmailStr = Field(max_length=100)
     password: str = Field(min_length=6, max_length=72)
 
 class RefreshTokenInput(BaseModel):
-    refresh_token: str
+    refresh_token: str = Field(min_length=1, max_length=500)
 
 class UserOutput(BaseModel):
-    id: int
-    name: str
-    email: str
-    role: str
+    id: int = Field(gt=0)
+    name: str = Field(min_length=3, max_length=100)
+    email: str = Field(max_length=100)
+    role: str = Field(max_length=20)
+    profile_picture: Optional[str] = Field(None, max_length=300)
     model_config = ConfigDict(from_attributes=True)
 
 
@@ -43,11 +44,11 @@ class ProvidersPatch(BaseModel):
 
 
 class ProviderOutput(BaseModel):
-    name: str
-    id: int
-    bio: str
-    specialty: str
-    operando: str
+    name: str = Field(min_length=3, max_length=100)
+    id: int = Field(gt=0)
+    bio: str = Field(max_length=500)
+    specialty: str = Field(max_length=100)
+    operando: str = Field(max_length=20)
     model_config = ConfigDict(from_attributes=True)
 
 
@@ -56,6 +57,7 @@ class ServiceInput(BaseModel):
     name: str = Field(min_length=1, max_length=100)
     duration_minutes: int = Field(gt=0, le=1440)
     price: float = Field(ge=0, le=1000000)
+    category: str = Field(min_length=1, max_length=50)
 
 
 class ServicePatch(BaseModel):
@@ -63,16 +65,18 @@ class ServicePatch(BaseModel):
     name: Optional[str] = Field(None, min_length=1, max_length=100)
     duration_minutes: Optional[int] = Field(None, gt=0, le=1440)
     price: Optional[float] = Field(None, ge=0, le=1000000)
+    category: Optional[str] = Field(None, min_length=1, max_length=50)
 
 
 class ServiceOutput(BaseModel):
 
-    id: int
-    provider_name: str = Field(alias="nome")
-    provider_id: int
-    name: str
-    duration_minutes: int
-    price: float
+    id: int = Field(gt=0)
+    provider_name: str = Field(alias="nome", max_length=100)
+    provider_id: int = Field(gt=0)
+    name: str = Field(max_length=100)
+    duration_minutes: int = Field(gt=0)
+    price: float = Field(ge=0)
+    category: str = Field(max_length=50)
     model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 
 
@@ -82,11 +86,21 @@ class AgendamentoInput(BaseModel):
 
 
 class AgendamentosOutput(BaseModel):
-    id: int
-    name_user: str
-    name_provider:str
-    name_service: str
+    id: int = Field(gt=0)
+    name_user: str = Field(max_length=100)
+    name_provider: str = Field(max_length=100)
+    name_service: str = Field(max_length=100)
     data_hora_inicio: datetime
     data_hora_fim: datetime
-    status: str
+    status: str = Field(max_length=20)
     model_config = ConfigDict(from_attributes=True)
+
+
+class ForgotPasswordInput(BaseModel):
+    email: EmailStr
+
+
+class ResetPasswordInput(BaseModel):
+    email: EmailStr
+    code: str = Field(min_length=6, max_length=6)
+    new_password: str = Field(min_length=6, max_length=72)

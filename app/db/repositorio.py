@@ -44,6 +44,33 @@ def get_user_by_name(db: Session, name: str) -> list[User]:
 def get_user_by_email(db: Session, email: str) -> Optional[User]:
     query = select(User).where(User.email == email)
     return db.scalars(query).first()
+
+
+def save_reset_code(db: Session, email: str, code: str, expire: datetime) -> bool:
+    user = get_user_by_email(db, email)
+    if not user:
+        return False
+    user.reset_password_code = code
+    user.reset_password_expire = expire
+    db.commit()
+    return True
+
+
+def reset_user_password(db: Session, email: str, code: str, hashed_password: str) -> bool:
+    query = select(User).where(
+        User.email == email,
+        User.reset_password_code == code,
+        User.reset_password_expire > datetime.now(timezone.utc)
+    )
+    user = db.scalars(query).first()
+    if not user:
+        return False
+    
+    user.hashed_password = hashed_password
+    user.reset_password_code = None
+    user.reset_password_expire = None
+    db.commit()
+    return True
 # ==============================================================================
 # PROVIDER REPOSITORY
 # ==============================================================================
@@ -155,6 +182,7 @@ def create_service(
     name: str,
     duration_minutes: int,
     price: float,
+    category: str,
 ) -> Optional[Service]:
     """Cria um serviço vinculado a um provider ativo. Retorna None se o provider não existir."""
     provider = get_provider_by_id(db, provider_id)
@@ -166,6 +194,7 @@ def create_service(
         name=name,
         duration_minutes=duration_minutes,
         price=price,
+        category=category,
     )
     db.add(service)
     db.commit()
@@ -207,6 +236,7 @@ def update_service(
     name: Optional[str] = None,
     duration_minutes: Optional[int] = None,
     price: Optional[float] = None,
+    category: Optional[str] = None,
 ) -> Optional[Service]:
     """Atualiza campos de um serviço. Retorna None se provider ou serviço não forem encontrados."""
     provider = get_provider_by_id(db, provider_id)
@@ -223,6 +253,8 @@ def update_service(
         service.duration_minutes = duration_minutes
     if price is not None:
         service.price = price
+    if category is not None:
+        service.category = category
 
     db.commit()
     return service
