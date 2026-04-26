@@ -1,0 +1,139 @@
+.booking-back {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  padding: var(--space-xl) 0 var(--space-md);
+}
+.booking-back:hover { color: var(--tertiary); }
+.booking-progress {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+  margin-bottom: var(--space-2xl);
+}
+.progress-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+}
+.progress-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: var(--neutral-300);
+  transition: all var(--transition-base);
+}
+.progress-step.active .progress-dot {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  box-shadow: 0 0 0 4px rgba(170,240,209,0.25);
+}
+.progress-label {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  font-weight: var(--weight-medium);
+}
+.progress-step.active .progress-label { color: var(--tertiary-dark); }
+.progress-line {
+  width: 60px;
+  height: 2px;
+  background-color: var(--neutral-200);
+  margin-bottom: 20px;
+}
+.booking-step {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+.booking-step h2 { font-size: var(--text-2xl); }
+.booking-service-label {
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+  margin-top: calc(var(--space-sm) * -1);
+}
+.timeslots-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+.timeslots-section label {
+  font-family: var(--font-headline);
+  font-weight: var(--weight-medium);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+.timeslots-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-sm);
+}
+.timeslot {
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--neutral-200);
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  font-weight: var(--weight-medium);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-align: center;
+}
+.timeslot:hover {
+  border-color: var(--primary-dark);
+  background-color: var(--primary-subtle);
+}
+.timeslot.active {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  border-color: transparent;
+  color: var(--neutral-800);
+  font-weight: var(--weight-semibold);
+}
+.review-card {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+}
+.review-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-lg) var(--space-xl);
+}
+.review-item-highlight { background-color: var(--primary-subtle); }
+.review-label { font-size: var(--text-sm); color: var(--text-tertiary); }
+.review-value {
+  font-family: var(--font-headline);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  text-align: right;
+}
+.review-price {
+  font-size: var(--text-xl);
+  color: var(--tertiary-dark);
+  font-weight: var(--weight-bold);
+}
+.review-divider {
+  height: 1px;
+  background-color: var(--neutral-100);
+  margin: 0 var(--space-xl);
+}
+.booking-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-lg);
+  padding: var(--space-3xl);
+  text-align: center;
+}
+@media (min-width: 768px) {
+  .timeslots-grid { grid-template-columns: repeat(4, 1fr); max-width: 500px; }
+  .review-card { max-width: 500px; }
+}

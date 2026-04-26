@@ -13,6 +13,7 @@ from app.db.repositorio import (
     NoAppointmentNeeded,
     get_appointment_by_id,
     get_appointments_by_provider,
+    get_appointments_by_client,
     patch_appointment,
     get_user_by_id,
     confirmar_agendamento
@@ -68,6 +69,15 @@ def create_appointment_route(
     confirmacao_email.delay(verificator_user.email, inicio_formatado, fim_formatado)
     return appointment
 
+@router_agendamentos.get("/me", response_model=list[AgendamentosOutput])
+def get_my_appointments(db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+    """Busca o histórico de agendamentos do cliente logado."""
+    try:
+        result = get_appointments_by_client(db, current_user.id)
+        return result
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Erro desconhecido: {str(exc)}")
+
 @router_agendamentos.get("/{appointment_id}/{client_id}", response_model=AgendamentosOutput)
 def get_appointment_route(appointment_id: int = Path(..., gt=0, le=2147483647), client_id: int = Path(..., gt=0, le=2147483647), db: Session = Depends(get_db)):
     """Busca agendamentos pelo Id"""
@@ -91,7 +101,7 @@ def get_appointments_all(provider_id: int = Path(..., gt=0, le=2147483647), db: 
     return result_get
 
 @router_agendamentos.delete("/{appointment_id}/{client_id}",response_model=AgendamentosOutput)
-def cancel_appointment(appointment_id: int = Path(..., gt=0, le=2147483647), client_id: int = Path(..., gt=0, le=2147483647), db: Session = Depends(get_db), provedor = Depends(require_provider)):
+def cancel_appointment(appointment_id: int = Path(..., gt=0, le=2147483647), client_id: int = Path(..., gt=0, le=2147483647), db: Session = Depends(get_db)):
     """Cancela o agendamento alterando o status"""
     try:
         soft_delete = patch_appointment(db,appointment_id, client_id)

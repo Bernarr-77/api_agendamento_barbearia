@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from app.db.repositorio import get_valid_token, get_user_by_email,get_user_by_id
 from app.core.security import verify_password,create_access_token,create_refresh_token, verify_token
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from app.db.models import User
 
 router_auth = APIRouter(tags=["Oauth"])
 
@@ -23,8 +24,8 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
         raise HTTPException(status_code=401, detail="Usuário não encontrado")
     return user
 
-def require_provider(current_user = Depends(get_current_user)) -> current_user:
-    if current_user.role != "PROVIDER":
+def require_provider(current_user: User = Depends(get_current_user)) -> User:
+    if current_user.role.value != "PROVIDER" and current_user.role != "PROVIDER":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Acesso negado. Área restrita para administrador."

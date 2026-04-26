@@ -1,0 +1,11 @@
+/* RegisterPage reusa os estilos de LoginPage */
+.register-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xl);
+  position: relative;
+  overflow: hidden;
+  background-color: var(--bg-primary);
+}

@@ -1,0 +1,101 @@
+.navbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: var(--bg-elevated);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--neutral-200);
+  transition: background var(--transition-base);
+  padding: var(--space-sm) 0;
+  padding-bottom: env(safe-area-inset-bottom, var(--space-sm));
+}
+
+.navbar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.navbar-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-md);
+  color: var(--neutral-400);
+  text-decoration: none;
+  transition: all var(--transition-fast);
+  position: relative;
+}
+
+.navbar-item:hover {
+  color: var(--secondary);
+}
+
+.navbar-item.active {
+  color: var(--tertiary-dark);
+}
+
+.navbar-item.active::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 3px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  border-radius: var(--radius-full);
+}
+
+.navbar-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+}
+
+.navbar-label {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: var(--weight-medium);
+  letter-spacing: 0.02em;
+}
+
+/* Desktop: sidebar lateral */
+@media (min-width: 768px) {
+  .navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: auto;
+    width: 80px;
+    border-top: none;
+    border-right: 1px solid var(--neutral-200);
+    padding: var(--space-xl) 0;
+  }
+
+  .navbar-inner {
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: var(--space-lg);
+    height: 100%;
+    max-width: none;
+  }
+
+  .navbar-item.active::before {
+    top: 50%;
+    left: -1px;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 24px;
+  }
+}

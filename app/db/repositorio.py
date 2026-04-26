@@ -319,6 +319,16 @@ def get_appointments_by_provider(
         raise NoAppointmentNeeded("Não existe agendamento para esse provider")
     return result
 
+def get_appointments_by_client(
+    db: Session,
+    client_id: int
+) -> Optional[list[Appointments]]:
+    query = select(Appointments).where(Appointments.client_id == client_id).order_by(Appointments.data_hora_inicio.desc())
+    result = db.scalars(query).all()
+    if not result:
+        return [] 
+    return result
+
 def patch_appointment(
     db: Session,
     appointment_id: int,

@@ -1,7 +1,7 @@
 import os
 import smtplib
 from email.message import EmailMessage
-from app.workers.celery_app import app
+from app.workers.celery_app import celery_app as app
 from dotenv import load_dotenv
 from app.db.session import SessionLocal
 from app.db.repositorio import cancel_appointment, get_user_by_id, get_appointment_by_id, get_appointment_status, NoAppointmentNeeded

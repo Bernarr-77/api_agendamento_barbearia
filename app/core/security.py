@@ -1,5 +1,5 @@
 from passlib.context import CryptContext
-from jose import jwt
+from jose import jwt, JWTError
 from datetime import datetime, timedelta, timezone
 from dotenv import load_dotenv
 import os
@@ -38,8 +38,11 @@ def create_access_token(data: dict):
 
 
 def verify_token(token: str):
-    payload = jwt.decode(token, secret_key, algorithms=[algorithm])
-    return payload.get('sub')
+    try:
+        payload = jwt.decode(token, secret_key, algorithms=[algorithm])
+        return payload.get('sub')
+    except JWTError:
+        return None
 
 def create_refresh_token(data: dict, db: Session):
 
@@ -49,7 +52,7 @@ def create_refresh_token(data: dict, db: Session):
     to_encode.update({"exp": expire})
     
     encoded_jwt = jwt.encode(to_encode,secret_key, algorithm=algorithm)
-    add_token_in_db(db, encoded_jwt, expire, data.get("id"))
+    add_token_in_db(db, encoded_jwt, expire, int(data.get("sub")))
     return encoded_jwt
 
 

@@ -15,11 +15,10 @@ from app.db.repositorio import (
 from app.db.session import get_db
 
 router_provider = APIRouter(prefix="/providers", 
-                            tags=["Providers"],
-                            dependencies=[Depends(require_provider)])
+                            tags=["Providers"])
 
 
-@router_provider.post("/", response_model=ProviderOutput)
+@router_provider.post("/", response_model=ProviderOutput, dependencies=[Depends(require_provider)])
 def register_provider_route(payload: ProviderInput, db: Session = Depends(get_db)):
     """Registra um novo provider a partir de um usuário existente."""
     try:
@@ -63,7 +62,7 @@ def get_provider_by_id_route(provider_id: int = Path(..., gt=0, le=2147483647), 
     return provider
 
 
-@router_provider.delete("/{provider_id}")
+@router_provider.delete("/{provider_id}", dependencies=[Depends(require_provider)])
 def deactivate_provider_route(provider_id: int = Path(..., gt=0, le=2147483647), db: Session = Depends(get_db)):
     """Soft-delete: marca o provider como INATIVO."""
     try:
@@ -77,7 +76,7 @@ def deactivate_provider_route(provider_id: int = Path(..., gt=0, le=2147483647),
     return result
 
 
-@router_provider.patch("/{provider_id}", response_model=ProviderOutput)
+@router_provider.patch("/{provider_id}", response_model=ProviderOutput, dependencies=[Depends(require_provider)])
 def update_provider_route(provider_id: int = Path(..., gt=0, le=2147483647), payload: ProvidersPatch = None, db: Session = Depends(get_db)):
     """Atualiza bio e/ou especialidade de um provider ativo."""
     if payload.bio is None and payload.specialty is None:
@@ -93,7 +92,7 @@ def update_provider_route(provider_id: int = Path(..., gt=0, le=2147483647), pay
     return provider
 
 
-@router_provider.patch("/{provider_id}/reactivate", response_model=ProviderOutput)
+@router_provider.patch("/{provider_id}/reactivate", response_model=ProviderOutput, dependencies=[Depends(require_provider)])
 def reactivate_provider_route(provider_id: int = Path(..., gt=0, le=2147483647), db: Session = Depends(get_db)):
     """Reativa um provider inativo."""
     try:

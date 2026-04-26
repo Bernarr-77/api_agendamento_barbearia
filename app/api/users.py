@@ -25,6 +25,10 @@ def register_user_route(payload: UserInput, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=f"Erro desconhecido: {str(exc)}")
     return new_user
 
+@router_user.get("/me", response_model=UserOutput)
+def get_me(current_user = Depends(get_current_user)):
+    """Retorna os dados do usuário logado no momento."""
+    return current_user
 
 @router_user.get("/email", response_model=UserOutput)
 def get_user_email(email: str = Query(..., min_length=1, max_length=100), db: Session = Depends(get_db),provedor = Depends(require_provider)):

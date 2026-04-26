@@ -1,0 +1,87 @@
+.profile-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-sm);
+  padding: var(--space-2xl) 0;
+}
+.profile-avatar-large {
+  width: 80px;
+  height: 80px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, var(--primary), var(--tertiary-light));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--space-sm);
+  box-shadow: var(--shadow-lg);
+}
+.profile-avatar-large span {
+  font-family: var(--font-headline);
+  font-weight: var(--weight-bold);
+  font-size: var(--text-3xl);
+  color: var(--neutral-800);
+}
+.profile-name {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-extrabold);
+}
+.profile-email {
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+}
+.profile-section {
+  margin-top: var(--space-xl);
+}
+.profile-section-title {
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+  font-weight: var(--weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: var(--space-md);
+}
+.profile-menu {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-elevated);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.profile-menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-lg) var(--space-xl);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: var(--text-base);
+  color: var(--text-primary);
+  transition: background var(--transition-fast);
+  text-align: left;
+  width: 100%;
+}
+.profile-menu-item:hover { background-color: var(--neutral-50); }
+.profile-menu-item:not(:last-child) {
+  border-bottom: 1px solid var(--neutral-100);
+}
+.profile-menu-item span { flex: 1; }
+.profile-menu-item > svg { color: var(--neutral-400); }
+.profile-menu-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  background: var(--primary-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--tertiary);
+}
+.profile-logout {
+  margin-top: var(--space-xl);
+  color: var(--error);
+}
+.profile-logout svg { color: var(--error); }

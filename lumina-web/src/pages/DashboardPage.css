@@ -1,0 +1,209 @@
+/* Dashboard Header */
+.dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-2xl) 0 var(--space-xl);
+}
+
+.dashboard-greeting-label {
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+  font-weight: var(--weight-medium);
+}
+
+.dashboard-greeting-name {
+  font-size: var(--text-3xl);
+  font-weight: var(--weight-extrabold);
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+.dashboard-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--tertiary-light) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-md);
+}
+
+.dashboard-avatar:hover {
+  transform: scale(1.05);
+  box-shadow: var(--shadow-lg);
+}
+
+.dashboard-avatar span {
+  font-family: var(--font-headline);
+  font-weight: var(--weight-bold);
+  font-size: var(--text-xl);
+  color: #151A18;
+}
+
+/* Quick Action */
+.quick-action-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  padding: var(--space-xl);
+  background: linear-gradient(135deg, var(--primary-subtle) 0%, var(--primary-light) 100%);
+  border-radius: var(--radius-xl);
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.quick-action-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.quick-action-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--neutral-800);
+}
+
+.quick-action-text {
+  flex: 1;
+}
+
+.quick-action-text h3 {
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  color: #151A18;
+  margin-bottom: 2px;
+}
+
+.quick-action-text p {
+  font-size: var(--text-sm);
+  color: var(--secondary);
+  margin: 0;
+}
+
+.quick-action-card > svg {
+  color: var(--secondary);
+  flex-shrink: 0;
+}
+
+/* Next Appointment Card */
+.next-appt-card {
+  cursor: pointer;
+  border-left: 4px solid var(--primary-dark);
+}
+
+.next-appt-card:hover {
+  border-left-color: var(--primary-darker);
+}
+
+/* Section Title */
+.section-title {
+  font-size: var(--text-xl);
+  font-weight: var(--weight-bold);
+  margin: var(--space-2xl) 0 var(--space-lg);
+  color: var(--text-primary);
+}
+
+/* Categories Grid */
+.categories-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+}
+
+.category-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-md);
+  padding: var(--space-xl) var(--space-lg);
+}
+
+.category-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.category-title {
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+}
+
+.category-description {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  line-height: 1.4;
+}
+
+/* Info Card */
+.dashboard-info {
+  margin-top: var(--space-xl);
+}
+
+.info-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-lg);
+  background-color: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+}
+
+.info-card-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background: var(--tertiary-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--tertiary);
+}
+
+.info-card h4 {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  margin-bottom: 2px;
+  color: var(--text-primary);
+}
+
+.info-card p {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+}
+
+/* Desktop */
+@media (min-width: 768px) {
+  .dashboard-header {
+    padding-left: 80px;
+  }
+
+  .dashboard-quick-action,
+  .dashboard-categories,
+  .dashboard-info,
+  .dashboard-next-appt {
+    padding-left: 80px;
+  }
+
+  .categories-grid {
+    grid-template-columns: 1fr 1fr;
+    max-width: 600px;
+  }
+}
