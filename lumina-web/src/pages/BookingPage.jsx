@@ -1,24 +1,29 @@
 import { useState, useEffect } from 'react';
-import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
 import LoadingSpinner from '../components/LoadingSpinner';
+import Calendar from '../components/Calendar';
 import './BookingPage.css';
 
 export default function BookingPage() {
   const { serviceId } = useParams();
-  const [searchParams] = useSearchParams();
-  const providerId = searchParams.get('provider');
+  const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const [service, setService] = useState(null);
+  // Get providerId and service from state if available
+  const stateProviderId = location.state?.providerId;
+  const stateService = location.state?.service;
+
+  const [service, setService] = useState(stateService || null);
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
   const [step, setStep] = useState(1); // 1 = data/hora, 2 = revisão
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!stateService);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [busyTimes, setBusyTimes] = useState([]);
 
   const timeSlots = [
     '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
@@ -27,12 +32,19 @@ export default function BookingPage() {
   ];
 
   useEffect(() => {
-    loadService();
-  }, [serviceId, providerId]);
+    if (!service) {
+      loadService();
+    }
+  }, [serviceId, stateProviderId]);
 
   const loadService = async () => {
+    if (!stateProviderId) {
+      setLoading(false);
+      return;
+    }
+    
     try {
-      const res = await api.get(`/providers/${providerId}/services/`);
+      const res = await api.get(`/services/${stateProviderId}`);
       const found = res.data.find((s) => s.id === parseInt(serviceId));
       setService(found || null);
     } catch (err) {
@@ -42,10 +54,33 @@ export default function BookingPage() {
     }
   };
 
+  useEffect(() => {
+    if (selectedDate && stateProviderId) {
+      loadBusyTimes(selectedDate);
+    } else {
+      setBusyTimes([]);
+    }
+  }, [selectedDate, stateProviderId]);
+
+  const loadBusyTimes = async (date) => {
+    try {
+      const res = await api.get(`/appointments/busy-times/${stateProviderId}?data=${date}`);
+      setBusyTimes(res.data || []);
+    } catch (err) {
+      console.error('Erro ao carregar horários ocupados:', err);
+    }
+  };
+
   const getMinDate = () => {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     return tomorrow.toISOString().split('T')[0];
+  };
+
+  const getMaxDate = () => {
+    const max = new Date();
+    max.setDate(max.getDate() + 10);
+    return max.toISOString().split('T')[0];
   };
 
   const handleConfirm = async () => {
@@ -56,7 +91,7 @@ export default function BookingPage() {
     try {
       const dateTime = `${selectedDate}T${selectedTime}:00`;
 
-      await api.post(`/appointments/${serviceId}/${providerId}`, {
+      await api.post(`/appointments/${serviceId}/${stateProviderId}`, {
         client_id: user.id,
         data_hora_inicio: dateTime,
       });
@@ -113,8 +148,32 @@ export default function BookingPage() {
   }
 
   return (
-    <div className="page" id="booking-page">
-      <div className="container">
+    <div className="page" id="booking-page" style={{ position: 'relative', overflow: 'hidden' }}>
+      {/* Background Decorations */}
+      <div style={{
+        position: 'absolute',
+        top: '-10%',
+        right: '-10%',
+        width: '400px',
+        height: '400px',
+        background: 'radial-gradient(circle, rgba(170, 240, 209, 0.08) 0%, transparent 70%)',
+        filter: 'blur(60px)',
+        zIndex: 0,
+        pointerEvents: 'none'
+      }} />
+      <div style={{
+        position: 'absolute',
+        bottom: '10%',
+        left: '-5%',
+        width: '300px',
+        height: '300px',
+        background: 'radial-gradient(circle, rgba(72, 127, 136, 0.06) 0%, transparent 70%)',
+        filter: 'blur(50px)',
+        zIndex: 0,
+        pointerEvents: 'none'
+      }} />
+
+      <div className="container" style={{ position: 'relative', zIndex: 1 }}>
         {/* Back button */}
         <button className="booking-back" onClick={() => step === 2 ? setStep(1) : navigate(-1)} id="booking-back">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -143,16 +202,14 @@ export default function BookingPage() {
               {service.name} — {service.provider_name}
             </p>
 
-            {/* Date Picker */}
+            {/* Date Picker (Custom Calendar) */}
             <div className="input-group">
               <label htmlFor="booking-date">Data</label>
-              <input
-                id="booking-date"
-                type="date"
-                className="input-field"
-                value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-                min={getMinDate()}
+              <Calendar 
+                selectedDate={selectedDate} 
+                onDateSelect={(date) => setSelectedDate(date)} 
+                minDate={getMinDate()}
+                maxDate={getMaxDate()} 
               />
             </div>
 
@@ -161,16 +218,22 @@ export default function BookingPage() {
               <div className="timeslots-section animate-fade-in">
                 <label>Horários disponíveis</label>
                 <div className="timeslots-grid" id="timeslots-grid">
-                  {timeSlots.map((time) => (
-                    <button
-                      key={time}
-                      className={`timeslot ${selectedTime === time ? 'active' : ''}`}
-                      onClick={() => setSelectedTime(time)}
-                      id={`slot-${time.replace(':', '')}`}
-                    >
-                      {time}
-                    </button>
-                  ))}
+                  {timeSlots.filter(t => !busyTimes.includes(t)).length > 0 ? (
+                    timeSlots.filter(t => !busyTimes.includes(t)).map((time) => (
+                      <button
+                        key={time}
+                        className={`timeslot ${selectedTime === time ? 'active' : ''}`}
+                        onClick={() => setSelectedTime(time)}
+                        id={`slot-${time.replace(':', '')}`}
+                      >
+                        {time}
+                      </button>
+                    ))
+                  ) : (
+                    <p style={{ gridColumn: '1 / -1', textAlign: 'center', color: 'var(--text-secondary)' }}>
+                      Nenhum horário disponível para esta data.
+                    </p>
+                  )}
                 </div>
               </div>
             )}
@@ -221,6 +284,19 @@ export default function BookingPage() {
                 <span className="review-value review-price">
                   {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(service.price)}
                 </span>
+              </div>
+            </div>
+
+            <div className="confirmation-warning animate-fade-in delay-1">
+              <div className="warning-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="8" x2="12" y2="12" />
+                  <line x1="12" y1="16" x2="12.01" y2="16" />
+                </svg>
+              </div>
+              <div className="warning-text">
+                <strong>Atenção:</strong> Por favor, apenas confirme o agendamento se você tiver certeza de que poderá comparecer. O profissional reserva este tempo exclusivamente para você.
               </div>
             </div>
 

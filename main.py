@@ -10,11 +10,18 @@ from fastapi.staticfiles import StaticFiles
 
 app = FastAPI(title="Agendamento API", version="1.0.0")
 
-# Cria a pasta uploads automaticamente caso ela não exista
-os.makedirs("uploads", exist_ok=True)
+# Verifica se estamos na Vercel (onde o sistema de arquivos é read-only)
+IS_VERCEL = os.environ.get("VERCEL") == "1"
 
-# Monta a pasta estática para o Front-end conseguir ler as imagens
-app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+if not IS_VERCEL:
+    os.makedirs("uploads", exist_ok=True)
+    app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+else:
+    try:
+        if os.path.exists("uploads"):
+            app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+    except Exception:
+        pass
 
 origins = [
     "http://localhost",
@@ -26,7 +33,7 @@ origins = [
 # 2. Configurando o Porteiro Global
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,     # Usa a lista VIP acima
+    allow_origins=["*"],       # Permite todas as origens para o MVP na nuvem
     allow_credentials=True,    # Permite que o Front-end envie cookies/tokens
     allow_methods=["*"],       # Permite todos os métodos (GET, POST, DELETE, etc.)
     allow_headers=["*"],       # Permite todos os cabeçalhos (essencial para o nosso Authorization: Bearer token)

@@ -11,6 +11,7 @@ export default function HistoryPage() {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedAppt, setSelectedAppt] = useState(null);
+  const [apptToCancel, setApptToCancel] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
 
   useEffect(() => {
@@ -20,7 +21,10 @@ export default function HistoryPage() {
   const fetchAppointments = async () => {
     try {
       const response = await api.get('/appointments/me');
-      setAppointments(response.data || []);
+      let data = response.data || [];
+      // Sort appointments: nearest dates first (ascending order)
+      data.sort((a, b) => new Date(a.data_hora_inicio) - new Date(b.data_hora_inicio));
+      setAppointments(data);
     } catch (error) {
       console.error('Erro ao buscar agendamentos:', error);
     } finally {
@@ -63,13 +67,18 @@ export default function HistoryPage() {
     }
   };
 
-  const handleCancel = async (appt) => {
-    if (!confirm('Tem certeza que deseja cancelar este agendamento?')) return;
+  const handleCancel = (appt) => {
+    setApptToCancel(appt);
+  };
+
+  const confirmCancel = async () => {
+    if (!apptToCancel) return;
     setActionLoading(true);
     try {
-      await api.delete(`/appointments/${appt.id}/${user.id}`);
+      await api.delete(`/appointments/${apptToCancel.id}/${user.id}`);
       await fetchAppointments();
       setSelectedAppt(null);
+      setApptToCancel(null);
     } catch (error) {
       alert(error.response?.data?.detail || 'Erro ao cancelar agendamento');
     } finally {
@@ -167,6 +176,43 @@ export default function HistoryPage() {
           onCancel={handleCancel}
           actionLoading={actionLoading}
         />
+      )}
+
+      {/* Modal de Cancelamento */}
+      {apptToCancel && (
+        <div className="appt-modal-overlay animate-fade-in" style={{ zIndex: 10000 }}>
+          <div className="appt-modal animate-slide-up" style={{ padding: 'var(--space-xl)', textAlign: 'center' }}>
+            <div style={{ marginBottom: 'var(--space-md)' }}>
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" style={{ margin: '0 auto' }}>
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="15" y1="9" x2="9" y2="15"></line>
+                <line x1="9" y1="9" x2="15" y2="15"></line>
+              </svg>
+            </div>
+            <h3 style={{ marginBottom: 'var(--space-sm)' }}>Cancelar Agendamento?</h3>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: 'var(--space-lg)', fontSize: 'var(--text-sm)' }}>
+              Tem certeza que deseja cancelar este agendamento? Esta ação não poderá ser desfeita.
+            </p>
+            <div style={{ display: 'flex', gap: 'var(--space-md)' }}>
+              <button 
+                className="btn btn-outline" 
+                style={{ flex: 1 }}
+                onClick={() => setApptToCancel(null)}
+                disabled={actionLoading}
+              >
+                Voltar
+              </button>
+              <button 
+                className="btn" 
+                style={{ flex: 1, backgroundColor: '#ef4444', color: 'white', borderColor: '#ef4444' }}
+                onClick={confirmCancel}
+                disabled={actionLoading}
+              >
+                {actionLoading ? 'Cancelando...' : 'Sim, cancelar'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

@@ -7,6 +7,15 @@
     <meta name="description" content="Lumina — Agende seus tratamentos de estética e odontologia com praticidade e elegância." />
     <meta name="theme-color" content="#AAF0D1" />
     <title>Lumina — Estética & Odontologia</title>
+    <script>
+      (function() {
+        try {
+          if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+          }
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

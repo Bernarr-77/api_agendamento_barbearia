@@ -13,11 +13,14 @@ from app.db.repositorio import (
     NoAppointmentNeeded,
     get_appointment_by_id,
     get_appointments_by_provider,
+    get_busy_times_by_provider,
     get_appointments_by_client,
     patch_appointment,
     get_user_by_id,
     confirmar_agendamento
 )
+
+from datetime import date
 
 router_agendamentos = APIRouter(prefix="/appointments", 
                                 tags=["Appointments"],
@@ -62,8 +65,7 @@ def create_appointment_route(
         enviar_email_lembrete.apply_async(args=[verificator_user.email, inicio_formatado, fim_formatado, appointment.id, payload.client_id], eta=aviso_um_dia_antes)
         momento_expiracao = inicio_sp - timedelta(hours=16)
         enviar_email_de_cancelamento.apply_async(args=[appointment.id, payload.client_id], eta=momento_expiracao)
-    else:
-        confirmar_agendamento(db, appointment.id, payload.client_id)
+
     if aviso_duas_hora_antes > datetime.now(tz=ZoneInfo("America/Sao_Paulo")):
         enviar_email_lembrete_2h.apply_async(args=[verificator_user.email, inicio_formatado, fim_formatado, appointment.id], eta=aviso_duas_hora_antes)
     confirmacao_email.delay(verificator_user.email, inicio_formatado, fim_formatado)
@@ -77,6 +79,24 @@ def get_my_appointments(db: Session = Depends(get_db), current_user = Depends(ge
         return result
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Erro desconhecido: {str(exc)}")
+
+@router_agendamentos.get("/busy-times/{provider_id}", response_model=list[str])
+def get_busy_times(provider_id: int = Path(..., gt=0, le=2147483647), data: date = None, db: Session = Depends(get_db)):
+    """Busca horários ocupados de um provider em uma data específica."""
+    if not data:
+        data = date.today()
+    try:
+        times = get_busy_times_by_provider(db, provider_id, data)
+        busy_slots = set()
+        for inicio, fim in times:
+            current = inicio.astimezone(ZoneInfo("America/Sao_Paulo"))
+            end_time = fim.astimezone(ZoneInfo("America/Sao_Paulo"))
+            while current < end_time:
+                busy_slots.add(current.strftime("%H:%M"))
+                current += timedelta(minutes=30)
+        return sorted(list(busy_slots))
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
 
 @router_agendamentos.get("/{appointment_id}/{client_id}", response_model=AgendamentosOutput)
 def get_appointment_route(appointment_id: int = Path(..., gt=0, le=2147483647), client_id: int = Path(..., gt=0, le=2147483647), db: Session = Depends(get_db)):

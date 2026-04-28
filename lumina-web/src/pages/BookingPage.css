@@ -92,8 +92,16 @@
 .timeslot.active {
   background: linear-gradient(135deg, var(--primary), var(--primary-dark));
   border-color: transparent;
-  color: var(--neutral-800);
-  font-weight: var(--weight-semibold);
+  color: #111514;
+  font-weight: var(--weight-bold);
+  box-shadow: 0 0 15px rgba(170, 240, 209, 0.4);
+  animation: pulseGlow 2s infinite;
+}
+
+@keyframes pulseGlow {
+  0% { box-shadow: 0 0 15px rgba(170, 240, 209, 0.4); }
+  50% { box-shadow: 0 0 25px rgba(170, 240, 209, 0.7); }
+  100% { box-shadow: 0 0 15px rgba(170, 240, 209, 0.4); }
 }
 .review-card {
   display: flex;
@@ -119,6 +127,34 @@
   font-size: var(--text-xl);
   color: var(--tertiary-dark);
   font-weight: var(--weight-bold);
+}
+
+.confirmation-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
+  margin-top: var(--space-lg);
+  padding: var(--space-lg);
+  background: rgba(245, 166, 35, 0.1);
+  border: 1px solid rgba(245, 166, 35, 0.3);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(8px);
+}
+
+.warning-icon {
+  color: #f5a623; /* Warning Orange */
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.warning-text {
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+
+.warning-text strong {
+  color: #f5a623;
 }
 .review-divider {
   height: 1px;

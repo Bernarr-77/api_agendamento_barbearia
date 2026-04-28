@@ -28,20 +28,22 @@ export default function ServicesPage() {
       const providerList = response.data;
       setProviders(providerList);
 
-      // Carrega serviços de todos os providers
+      // Carrega serviços de todos os providers retornados
       const allServices = [];
       for (const provider of providerList) {
         try {
-          const servicesRes = await api.get(`/providers/${provider.id}/services/`);
+          const servicesRes = await api.get(`/services/${provider.id}`);
           const servicesWithProvider = servicesRes.data.map((s) => ({
             ...s,
             provider_name: provider.name,
             provider_specialty: provider.specialty,
             provider_id: provider.id,
+            // Normaliza a categoria para garantir que o filtro funcione
+            category: s.category?.toUpperCase()
           }));
           allServices.push(...servicesWithProvider);
-        } catch {
-          // Provider pode não ter serviços
+        } catch (err) {
+          console.warn(`Não foi possível carregar serviços para o provider ${provider.id}`);
         }
       }
       setServices(allServices);
@@ -53,21 +55,23 @@ export default function ServicesPage() {
   };
 
   const handleBook = (service) => {
-    navigate(`/booking/${service.id}?provider=${service.provider_id}`);
+    navigate(`/booking/${service.id}`, { 
+      state: { providerId: service.provider_id, service } 
+    });
   };
 
   const filteredServices = services.filter((s) => {
     if (activeTab === 'all') return true;
-    const spec = s.provider_specialty?.toLowerCase() || '';
-    if (activeTab === 'estetica') return spec.includes('esté') || spec.includes('este');
-    if (activeTab === 'odonto') return spec.includes('odont') || spec.includes('dent');
+    const cat = s.category?.toUpperCase() || '';
+    if (activeTab === 'ESTETICO') return cat === 'ESTETICO';
+    if (activeTab === 'ODONTOLOGICO') return cat === 'ODONTOLOGICO';
     return true;
   });
 
   const tabs = [
     { id: 'all', label: 'Todos' },
-    { id: 'estetica', label: 'Estéticos' },
-    { id: 'odonto', label: 'Odontológicos' },
+    { id: 'ESTETICO', label: 'Estéticos' },
+    { id: 'ODONTOLOGICO', label: 'Odontológicos' },
   ];
 
   return (

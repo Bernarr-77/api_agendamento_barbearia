@@ -21,7 +21,7 @@ def confirmacao_email(email_destino: str, inicio_formatado: str, fim_formatado: 
 
     # 2. Criamos o envelope
     msg = EmailMessage()
-    msg['Subject'] = "✂️ Seu horário está confirmado!"
+    msg['Subject'] = "✨ Seu horário está confirmado!"
     msg['From'] = remetente
     msg['To'] = email_destino
 
@@ -32,19 +32,19 @@ def confirmacao_email(email_destino: str, inicio_formatado: str, fim_formatado: 
     html_template = f"""
     <!DOCTYPE html>
     <html>
-    <body style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; margin: 0;">
-        <div style="max-width: 600px; margin: 0 auto; background: #ffffff; padding: 30px; border-radius: 8px; border-top: 5px solid #2c3e50; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-            <h2 style="color: #2c3e50; text-align: center; margin-bottom: 20px;">Agendamento Confirmado</h2>
-            <p style="color: #555555; font-size: 16px; line-height: 1.5;">Olá!</p>
-            <p style="color: #555555; font-size: 16px; line-height: 1.5;">Passando para avisar que seu horário na nossa barbearia está garantido.</p>
+    <body style="font-family: Arial, sans-serif; background-color: #0f0f0f; padding: 20px; margin: 0;">
+        <div style="max-width: 600px; margin: 0 auto; background: #111111; padding: 30px; border-radius: 8px; border-top: 5px solid #AAF0D1; border: 1px solid #2e2e2e; box-shadow: 0 4px 8px rgba(0,0,0,0.5);">
+            <h2 style="color: #AAF0D1; text-align: center; margin-bottom: 20px;">Agendamento Confirmado</h2>
+            <p style="color: #cccccc; font-size: 16px; line-height: 1.5;">Olá!</p>
+            <p style="color: #999999; font-size: 16px; line-height: 1.5;">Passando para avisar que seu horário na <strong>Lumina</strong> está garantido.</p>
             
-            <div style="background-color: #f8f9fa; border-left: 4px solid #2c3e50; padding: 15px; margin: 25px 0;">
-                <p style="margin: 0 0 10px 0; color: #333333; font-size: 16px;"><strong>Detalhes do Agendamento:</strong></p>
-                <p style="margin: 0; color: #555555; font-size: 15px;">📅 Início: <strong>{inicio_formatado}</strong></p>
-                <p style="margin: 5px 0 0 0; color: #555555; font-size: 15px;">⏰ Fim: <strong>{fim_formatado}</strong></p>
+            <div style="background-color: #1a1a1a; border-left: 4px solid #487F88; padding: 15px; margin: 25px 0;">
+                <p style="margin: 0 0 10px 0; color: #AAF0D1; font-size: 16px;"><strong>Detalhes do Agendamento:</strong></p>
+                <p style="margin: 0; color: #eeeeee; font-size: 15px;">📅 Início: <strong>{inicio_formatado}</strong></p>
+                <p style="margin: 5px 0 0 0; color: #eeeeee; font-size: 15px;">⏰ Fim: <strong>{fim_formatado}</strong></p>
             </div>
             
-            <p style="color: #888888; font-size: 12px; text-align: center; margin-top: 30px;">
+            <p style="color: #444444; font-size: 12px; text-align: center; margin-top: 30px;">
                 Este é um e-mail automático, por favor não responda.
             </p>
         </div>
@@ -78,7 +78,7 @@ def enviar_email_lembrete(self, email_destino: str, inicio_formatado: str, fim_f
 
     # 3. Envelope do e-mail
     msg = EmailMessage()
-    msg['Subject'] = "✂️ Confirme seu horário na barbearia!"
+    msg['Subject'] = "✨ Confirme seu horário na Lumina!"
     msg['From'] = remetente
     msg['To'] = email_destino
 
@@ -87,7 +87,7 @@ def enviar_email_lembrete(self, email_destino: str, inicio_formatado: str, fim_f
         f"Olá! Confirme seu agendamento para {inicio_formatado} clicando no link: {link_confirmacao}"
     )
 
-    # 5. Corpo HTML — tema escuro premium de barbearia
+    # 5. Corpo HTML — tema escuro premium Lumina
     html_template = f"""
     <!DOCTYPE html>
     <html lang="pt-BR">
@@ -105,21 +105,21 @@ def enviar_email_lembrete(self, email_destino: str, inicio_formatado: str, fim_f
                     <table width="600" cellpadding="0" cellspacing="0" style="
                         max-width: 600px;
                         width: 100%;
-                        background: linear-gradient(145deg, #1a1a1a, #222222);
+                        background: linear-gradient(145deg, #111111, #1a1a1a);
                         border-radius: 16px;
                         overflow: hidden;
                         border: 1px solid #2e2e2e;
                         box-shadow: 0 20px 60px rgba(0,0,0,0.6);
                     ">
 
-                        <!-- Header com gradiente dourado -->
+                        <!-- Header com gradiente Lumina -->
                         <tr>
                             <td style="
-                                background: linear-gradient(135deg, #b8860b 0%, #daa520 50%, #b8860b 100%);
+                                background: linear-gradient(135deg, #487F88 0%, #AAF0D1 50%, #487F88 100%);
                                 padding: 36px 40px;
                                 text-align: center;
                             ">
-                                <p style="margin:0; font-size:36px; letter-spacing:4px;">✂️</p>
+                                <p style="margin:0; font-size:36px; letter-spacing:4px;">✨</p>
                                 <h1 style="
                                     margin: 12px 0 0 0;
                                     color: #0f0f0f;
@@ -127,9 +127,9 @@ def enviar_email_lembrete(self, email_destino: str, inicio_formatado: str, fim_f
                                     font-weight: 700;
                                     letter-spacing: 2px;
                                     text-transform: uppercase;
-                                ">Confirme seu Agendamento</h1>
+                                ">Solicitação Recebida</h1>
                                 <p style="margin: 6px 0 0 0; color: #1a1a0a; font-size: 13px; opacity: 0.8;">
-                                    Estamos esperando por você!
+                                    Seu horário foi reservado com sucesso!
                                 </p>
                             </td>
                         </tr>
@@ -142,21 +142,20 @@ def enviar_email_lembrete(self, email_destino: str, inicio_formatado: str, fim_f
                                     Olá! 👋
                                 </p>
                                 <p style="margin: 0 0 28px 0; color: #999999; font-size: 15px; line-height: 1.7;">
-                                    Recebemos a sua solicitação de agendamento. Para garantir a sua vaga,
-                                    <strong style="color: #daa520;">clique no botão abaixo</strong> e confirme sua presença.
+                                    Recebemos a sua solicitação de agendamento. Seu horário já está reservado e no momento encontra-se com o status <strong style="color: #AAF0D1;">Pendente</strong>. Entraremos em contato ou você poderá acompanhar pelo painel.
                                 </p>
 
                                 <!-- Card de detalhes -->
                                 <table width="100%" cellpadding="0" cellspacing="0" style="
-                                    background: #111111;
+                                    background: #1a1a1a;
                                     border: 1px solid #2e2e2e;
-                                    border-left: 4px solid #daa520;
+                                    border-left: 4px solid #AAF0D1;
                                     border-radius: 10px;
                                     margin-bottom: 36px;
                                 ">
                                     <tr>
                                         <td style="padding: 20px 24px;">
-                                            <p style="margin: 0 0 14px 0; color: #daa520; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px;">
+                                            <p style="margin: 0 0 14px 0; color: #AAF0D1; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px;">
                                                 📋 Detalhes do Agendamento
                                             </p>
                                             <table width="100%" cellpadding="0" cellspacing="0">
@@ -180,7 +179,7 @@ def enviar_email_lembrete(self, email_destino: str, inicio_formatado: str, fim_f
                                                     <td style="padding: 6px 0; color:#888888; font-size:13px;">
                                                         🔖 Protocolo:
                                                     </td>
-                                                    <td style="padding: 6px 0; color:#daa520; font-size:14px; font-weight:600;">
+                                                    <td style="padding: 6px 0; color:#AAF0D1; font-size:14px; font-weight:600;">
                                                         #{agendamento_id:06d}
                                                     </td>
                                                 </tr>
@@ -189,59 +188,8 @@ def enviar_email_lembrete(self, email_destino: str, inicio_formatado: str, fim_f
                                     </tr>
                                 </table>
 
-                                <!-- Botão CTA principal -->
-                                <table width="100%" cellpadding="0" cellspacing="0">
-                                    <tr>
-                                        <td align="center" style="padding-bottom: 16px;">
-                                            <a href="{link_confirmacao}" style="
-                                                display: inline-block;
-                                                background: linear-gradient(135deg, #b8860b, #daa520, #b8860b);
-                                                color: #0f0f0f;
-                                                text-decoration: none;
-                                                font-size: 15px;
-                                                font-weight: 700;
-                                                padding: 16px 48px;
-                                                border-radius: 50px;
-                                                letter-spacing: 1px;
-                                                text-transform: uppercase;
-                                                box-shadow: 0 4px 20px rgba(218,165,32,0.35);
-                                            ">
-                                                ✅ Confirmar Agendamento
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td align="center">
-                                            <p style="margin:0; color:#555555; font-size:12px;">
-                                                Ou copie o link: 
-                                                <a href="{link_confirmacao}" style="color:#daa520; font-size:11px; word-break:break-all;">
-                                                    {link_confirmacao}
-                                                </a>
-                                            </p>
-                                        </td>
-                                    </tr>
                                 </table>
 
-                            </td>
-                        </tr>
-
-                        <!-- Aviso de expiração -->
-                        <tr>
-                            <td style="padding: 0 40px 32px 40px;">
-                                <table width="100%" cellpadding="0" cellspacing="0" style="
-                                    background: #1a1008;
-                                    border: 1px solid #3a2e00;
-                                    border-radius: 8px;
-                                ">
-                                    <tr>
-                                        <td style="padding: 14px 18px;">
-                                            <p style="margin:0; color:#c8a400; font-size:13px; line-height:1.5;">
-                                                ⚠️ <strong>Atenção:</strong> O link de confirmação expira em <strong>8 horas</strong>.
-                                                Caso não confirme, seu horário poderá ser liberado para outros clientes.
-                                            </p>
-                                        </td>
-                                    </tr>
-                                </table>
                             </td>
                         </tr>
 
@@ -256,7 +204,7 @@ def enviar_email_lembrete(self, email_destino: str, inicio_formatado: str, fim_f
                                     Este é um e-mail automático, por favor não responda.
                                 </p>
                                 <p style="margin:0; color:#333333; font-size:11px;">
-                                    © 2026 Barbearia · Todos os direitos reservados
+                                    © 2026 Lumina · Todos os direitos reservados
                                 </p>
                             </td>
                         </tr>
@@ -332,10 +280,10 @@ def enviar_email_lembrete_2h(self, email_destino: str, inicio_formatado: str, fi
                         box-shadow: 0 20px 60px rgba(0,0,0,0.6);
                     ">
 
-                        <!-- Header azul -->
+                        <!-- Header Lumina -->
                         <tr>
                             <td style="
-                                background: linear-gradient(135deg, #0d4f6e 0%, #1a8fb5 50%, #0d4f6e 100%);
+                                background: linear-gradient(135deg, #1e3a3a 0%, #487F88 50%, #1e3a3a 100%);
                                 padding: 36px 40px;
                                 text-align: center;
                             ">
@@ -348,8 +296,8 @@ def enviar_email_lembrete_2h(self, email_destino: str, inicio_formatado: str, fi
                                     letter-spacing: 2px;
                                     text-transform: uppercase;
                                 ">Lembrete de Horário</h1>
-                                <p style="margin: 6px 0 0 0; color: #b3e0f2; font-size: 13px; opacity: 0.8;">
-                                    Faltam 2 horas para o seu atendimento
+                                <p style="margin: 6px 0 0 0; color: #AAF0D1; font-size: 13px; opacity: 0.8;">
+                                    Faltam 2 horas para o seu atendimento na Lumina
                                 </p>
                             </td>
                         </tr>
@@ -362,21 +310,21 @@ def enviar_email_lembrete_2h(self, email_destino: str, inicio_formatado: str, fi
                                     Olá! 👋
                                 </p>
                                 <p style="margin: 0 0 28px 0; color: #999999; font-size: 15px; line-height: 1.7;">
-                                    Passando para lembrar que seu horário na barbearia está
-                                    <strong style="color: #1a8fb5;">chegando!</strong> Prepare-se e nos vemos em breve.
+                                    Passando para lembrar que seu horário na clínica está
+                                    <strong style="color: #AAF0D1;">chegando!</strong> Prepare-se e nos vemos em breve.
                                 </p>
 
                                 <!-- Card de detalhes -->
                                 <table width="100%" cellpadding="0" cellspacing="0" style="
                                     background: #111111;
                                     border: 1px solid #2e2e2e;
-                                    border-left: 4px solid #1a8fb5;
+                                    border-left: 4px solid #487F88;
                                     border-radius: 10px;
                                     margin-bottom: 36px;
                                 ">
                                     <tr>
                                         <td style="padding: 20px 24px;">
-                                            <p style="margin: 0 0 14px 0; color: #1a8fb5; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px;">
+                                            <p style="margin: 0 0 14px 0; color: #487F88; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px;">
                                                 📋 Detalhes do Agendamento
                                             </p>
                                             <table width="100%" cellpadding="0" cellspacing="0">
@@ -400,7 +348,7 @@ def enviar_email_lembrete_2h(self, email_destino: str, inicio_formatado: str, fi
                                                     <td style="padding: 6px 0; color:#888888; font-size:13px;">
                                                         🔖 Protocolo:
                                                     </td>
-                                                    <td style="padding: 6px 0; color:#1a8fb5; font-size:14px; font-weight:600;">
+                                                    <td style="padding: 6px 0; color:#487F88; font-size:14px; font-weight:600;">
                                                         #{agendamento_id:06d}
                                                     </td>
                                                 </tr>
@@ -411,14 +359,14 @@ def enviar_email_lembrete_2h(self, email_destino: str, inicio_formatado: str, fi
 
                                 <!-- Dica -->
                                 <table width="100%" cellpadding="0" cellspacing="0" style="
-                                    background: #0f1a1f;
-                                    border: 1px solid #1a3a4a;
+                                    background: #0d1a1a;
+                                    border: 1px solid #1a3a3a;
                                     border-radius: 8px;
                                 ">
                                     <tr>
                                         <td style="padding: 14px 18px;">
-                                            <p style="margin:0; color:#1a8fb5; font-size:13px; line-height:1.5;">
-                                                💈 <strong>Dica:</strong> Chegue com alguns minutos de antecedência
+                                            <p style="margin:0; color:#487F88; font-size:13px; line-height:1.5;">
+                                                ✨ <strong>Dica:</strong> Chegue com alguns minutos de antecedência
                                                 para garantir um atendimento tranquilo.
                                             </p>
                                         </td>
@@ -439,7 +387,7 @@ def enviar_email_lembrete_2h(self, email_destino: str, inicio_formatado: str, fi
                                     Este é um e-mail automático, por favor não responda.
                                 </p>
                                 <p style="margin:0; color:#333333; font-size:11px;">
-                                    © 2026 Barbearia · Todos os direitos reservados
+                                    © 2026 Lumina · Todos os direitos reservados
                                 </p>
                             </td>
                         </tr>
@@ -512,7 +460,7 @@ def enviar_email_de_cancelamento(self, agendamento_id: int, client_id: int):
         f"pois não recebemos a confirmação dentro do prazo."
     )
 
-    # 8. Corpo HTML — tema escuro premium de barbearia (mesmo padrão do lembrete)
+    # 8. Corpo HTML — tema escuro premium Lumina (mesmo padrão do lembrete)
     html_template = f"""
     <!DOCTYPE html>
     <html lang="pt-BR">
@@ -530,17 +478,17 @@ def enviar_email_de_cancelamento(self, agendamento_id: int, client_id: int):
                     <table width="600" cellpadding="0" cellspacing="0" style="
                         max-width: 600px;
                         width: 100%;
-                        background: linear-gradient(145deg, #1a1a1a, #222222);
+                        background: linear-gradient(145deg, #111111, #1a1a1a);
                         border-radius: 16px;
                         overflow: hidden;
                         border: 1px solid #2e2e2e;
                         box-shadow: 0 20px 60px rgba(0,0,0,0.6);
                     ">
 
-                        <!-- Header com gradiente vermelho -->
+                        <!-- Header com gradiente profissional -->
                         <tr>
                             <td style="
-                                background: linear-gradient(135deg, #8b0000 0%, #c0392b 50%, #8b0000 100%);
+                                background: linear-gradient(135deg, #4c1111 0%, #8b0000 50%, #4c1111 100%);
                                 padding: 36px 40px;
                                 text-align: center;
                             ">
@@ -554,7 +502,7 @@ def enviar_email_de_cancelamento(self, agendamento_id: int, client_id: int):
                                     text-transform: uppercase;
                                 ">Agendamento Cancelado</h1>
                                 <p style="margin: 6px 0 0 0; color: #ffcccc; font-size: 13px; opacity: 0.8;">
-                                    Confirmação não recebida no prazo
+                                    Confirmação não recebida no prazo na Lumina
                                 </p>
                             </td>
                         </tr>
@@ -624,13 +572,13 @@ def enviar_email_de_cancelamento(self, agendamento_id: int, client_id: int):
 
                                 <!-- Aviso para reagendar -->
                                 <table width="100%" cellpadding="0" cellspacing="0" style="
-                                    background: #0f1a0f;
-                                    border: 1px solid #1a3a1a;
+                                    background: #0d1a1a;
+                                    border: 1px solid #1a3a3a;
                                     border-radius: 8px;
                                 ">
                                     <tr>
                                         <td style="padding: 14px 18px;">
-                                            <p style="margin:0; color:#4caf50; font-size:13px; line-height:1.5;">
+                                            <p style="margin:0; color:#AAF0D1; font-size:13px; line-height:1.5;">
                                                 💡 <strong>Deseja reagendar?</strong> Entre em contato conosco ou
                                                 acesse nosso sistema para escolher um novo horário disponível.
                                             </p>
@@ -652,7 +600,7 @@ def enviar_email_de_cancelamento(self, agendamento_id: int, client_id: int):
                                     Este é um e-mail automático, por favor não responda.
                                 </p>
                                 <p style="margin:0; color:#333333; font-size:11px;">
-                                    © 2026 Barbearia · Todos os direitos reservados
+                                    © 2026 Lumina · Todos os direitos reservados
                                 </p>
                             </td>
                         </tr>
@@ -706,13 +654,13 @@ def enviar_email_recuperacao(self, email_destino: str, codigo: str):
         <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#0f0f0f; padding: 40px 20px;">
             <tr>
                 <td align="center">
-                    <table width="600" style="background:#1a1a1a; border-radius:16px; padding:40px; border:1px solid #2e2e2e;">
+                    <table width="600" style="background:#111111; border-radius:16px; padding:40px; border:1px solid #2e2e2e;">
                         <tr>
                             <td align="center">
-                                <h1 style="color:#daa520; margin-bottom:20px;">Recuperação de Senha</h1>
-                                <p style="color:#cccccc; font-size:16px;">Você solicitou a alteração da sua senha. Utilize o código abaixo para prosseguir:</p>
-                                <div style="background:#111; border:1px dashed #daa520; padding:20px; margin:30px 0; border-radius:8px;">
-                                    <span style="color:#daa520; font-size:32px; font-weight:bold; letter-spacing:8px;">{codigo}</span>
+                                <h1 style="color:#AAF0D1; margin-bottom:20px;">Recuperação de Senha</h1>
+                                <p style="color:#cccccc; font-size:16px;">Você solicitou a alteração da sua senha na Lumina. Utilize o código abaixo para prosseguir:</p>
+                                <div style="background:#0a0a0a; border:1px dashed #AAF0D1; padding:20px; margin:30px 0; border-radius:8px;">
+                                    <span style="color:#AAF0D1; font-size:32px; font-weight:bold; letter-spacing:8px;">{codigo}</span>
                                 </div>
                                 <p style="color:#888; font-size:14px;">Este código expira em 10 minutos. Se você não solicitou esta alteração, ignore este e-mail.</p>
                             </td>

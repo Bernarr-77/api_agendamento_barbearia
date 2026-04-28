@@ -59,6 +59,11 @@ class ServiceInput(BaseModel):
     price: float = Field(ge=0, le=1000000)
     category: str = Field(min_length=1, max_length=50)
 
+    @field_validator('category')
+    @classmethod
+    def category_to_upper(cls, v: str) -> str:
+        return v.upper() if v else v
+
 
 class ServicePatch(BaseModel):
 
@@ -66,6 +71,11 @@ class ServicePatch(BaseModel):
     duration_minutes: Optional[int] = Field(None, gt=0, le=1440)
     price: Optional[float] = Field(None, ge=0, le=1000000)
     category: Optional[str] = Field(None, min_length=1, max_length=50)
+
+    @field_validator('category')
+    @classmethod
+    def category_to_upper(cls, v: Optional[str]) -> Optional[str]:
+        return v.upper() if v else v
 
 
 class ServiceOutput(BaseModel):

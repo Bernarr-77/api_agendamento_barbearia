@@ -1,28 +1,117 @@
+import { useState, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import api from '../services/api';
 import './ProfilePage.css';
 
 export default function ProfilePage() {
-  const { user, logout } = useAuth();
+  const { user, logout, updateUser } = useAuth();
   const navigate = useNavigate();
+  const [uploading, setUploading] = useState(false);
+  const [isImageFullscreen, setIsImageFullscreen] = useState(false);
+  const fileInputRef = useRef(null);
 
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
+  const handlePhotoEditClick = (e) => {
+    e.stopPropagation();
+    fileInputRef.current.click();
+  };
+
+  const handlePhotoClick = () => {
+    if (user?.profile_picture) {
+      setIsImageFullscreen(true);
+    }
+  };
+
+  const handlePhotoChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      setUploading(true);
+      const response = await api.post('/users/profile-picture', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      // A resposta tem { message, profile_picture: user.profile_picture }
+      updateUser({ profile_picture: response.data.profile_picture });
+    } catch (error) {
+      console.error('Erro ao enviar foto', error);
+      alert('Não foi possível atualizar a foto de perfil. Tente novamente.');
+    } finally {
+      setUploading(false);
+      // Limpa o input file para permitir selecionar o mesmo arquivo novamente
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  // Base URL do backend para construir URL absoluta da imagem
+  const API_BASE_URL = 'http://localhost:8000';
+  const profileImageUrl = user?.profile_picture 
+    ? (user.profile_picture.startsWith('/') ? `${API_BASE_URL}${user.profile_picture}` : `${API_BASE_URL}/${user.profile_picture}`) 
+    : null;
+
   return (
     <div className="page" id="profile-page">
       <div className="container">
         <header className="profile-header animate-fade-in">
-          <div className="profile-avatar-large">
-            <span>{user?.name?.charAt(0).toUpperCase() || 'U'}</span>
+          <div className="profile-avatar-wrapper">
+            <div className="profile-avatar-clickable" onClick={handlePhotoClick}>
+              {profileImageUrl ? (
+                <img src={profileImageUrl} alt="Profile" className="profile-avatar-large-img" />
+              ) : (
+                <div className="profile-avatar-large">
+                  <span>{user?.name?.charAt(0).toUpperCase() || 'U'}</span>
+                </div>
+              )}
+            </div>
+            
+            {/* Botão de Edição (Lápis) */}
+            <button className="profile-avatar-edit-btn" onClick={handlePhotoEditClick} aria-label="Editar foto de perfil">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 20h9"></path>
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+              </svg>
+            </button>
+
+            {uploading && <div className="profile-avatar-spinner"></div>}
           </div>
+          
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handlePhotoChange}
+            accept="image/jpeg, image/png"
+            style={{ display: 'none' }}
+          />
           <h1 className="profile-name">{user?.name}</h1>
           <p className="profile-email">{user?.email}</p>
           <span className="badge badge-confirmed">{user?.role === 'PROVIDER' ? 'Profissional' : 'Cliente'}</span>
         </header>
+
+        {/* Fullscreen Image Modal */}
+        {isImageFullscreen && profileImageUrl && (
+          <div className="fullscreen-image-modal animate-fade-in" onClick={() => setIsImageFullscreen(false)}>
+            <button className="fullscreen-close-btn" onClick={() => setIsImageFullscreen(false)}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+            <img src={profileImageUrl} alt="Profile Fullscreen" className="fullscreen-image" onClick={(e) => e.stopPropagation()} />
+          </div>
+        )}
 
         <section className="profile-section animate-fade-in delay-1">
           <h3 className="profile-section-title">Conta</h3>

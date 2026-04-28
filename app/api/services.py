@@ -13,11 +13,10 @@ from app.db.repositorio import (
 from app.db.session import get_db
 
 router_service = APIRouter(prefix="/services", 
-                            tags=["Services"],
-                            dependencies=[Depends(require_provider)])
+                            tags=["Services"])
 
 
-@router_service.post("/", response_model=ServiceOutput)
+@router_service.post("/", response_model=ServiceOutput, dependencies=[Depends(require_provider)])
 def create_service_route(payload: ServiceInput, db: Session = Depends(get_db)):
     """Cria um novo serviço vinculado a um provider ativo."""
     try:
@@ -52,7 +51,7 @@ def get_services_route(provider_id: int = Path(..., gt=0, le=2147483647), db: Se
     return services
 
 
-@router_service.patch("/{provider_id}/{service_id}", response_model=ServiceOutput)
+@router_service.patch("/{provider_id}/{service_id}", response_model=ServiceOutput, dependencies=[Depends(require_provider)])
 def update_service_route(
     provider_id: int = Path(..., gt=0, le=2147483647),
     service_id: int = Path(..., gt=0, le=2147483647),

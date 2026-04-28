@@ -18,7 +18,7 @@ router_provider = APIRouter(prefix="/providers",
                             tags=["Providers"])
 
 
-@router_provider.post("/", response_model=ProviderOutput, dependencies=[Depends(require_provider)])
+@router_provider.post("/", response_model=ProviderOutput,)
 def register_provider_route(payload: ProviderInput, db: Session = Depends(get_db)):
     """Registra um novo provider a partir de um usuário existente."""
     try:
@@ -48,7 +48,7 @@ def get_all_providers_route(specialty: Optional[str] = Query(None, min_length=1,
     return providers
 
 
-@router_provider.get("/{provider_id}", response_model=ProviderOutput)
+@router_provider.get("/{provider_id}", response_model=ProviderOutput,dependencies=[Depends(require_provider)])
 def get_provider_by_id_route(provider_id: int = Path(..., gt=0, le=2147483647), db: Session = Depends(get_db)):
     """Busca um provider ativo pelo ID."""
     try:

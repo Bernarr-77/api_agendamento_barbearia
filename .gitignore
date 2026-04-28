@@ -219,3 +219,6 @@ __marimo__/
 alembic.ini
 
 uploads/
+.vercel
+.env*.local
+*.db

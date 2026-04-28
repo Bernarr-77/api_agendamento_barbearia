@@ -73,7 +73,7 @@ export default function DashboardPage() {
           <line x1="15" y1="9" x2="15.01" y2="9" strokeWidth="3" strokeLinecap="round" />
         </svg>
       ),
-      gradient: 'linear-gradient(135deg, #AAF0D1 0%, #7EDDB5 100%)',
+      gradient: 'linear-gradient(135deg, #B5F5D9 0%, #8DE0BD 100%)',
     },
     {
       id: 'odonto',
@@ -85,13 +85,37 @@ export default function DashboardPage() {
           <path d="M12 5.5C12 5.5 15.5 2 18.5 4C21.5 6 20 10 19 12C18 14 17 18 16 20C15 22 13 22 12 19" />
         </svg>
       ),
-      gradient: 'linear-gradient(135deg, #487F88 0%, #6BA3AC 100%)',
+      gradient: 'linear-gradient(135deg, #5CA8B3 0%, #487F88 100%)',
     },
   ];
 
   return (
-    <div className="page" id="dashboard-page">
-      <div className="container">
+    <div className="page" id="dashboard-page" style={{ position: 'relative', overflow: 'hidden' }}>
+      {/* Background Decorations */}
+      <div style={{
+        position: 'absolute',
+        top: '-10%',
+        right: '-10%',
+        width: '400px',
+        height: '400px',
+        background: 'radial-gradient(circle, rgba(170, 240, 209, 0.1) 0%, transparent 70%)',
+        filter: 'blur(60px)',
+        zIndex: 0,
+        pointerEvents: 'none'
+      }} />
+      <div style={{
+        position: 'absolute',
+        bottom: '10%',
+        left: '-5%',
+        width: '300px',
+        height: '300px',
+        background: 'radial-gradient(circle, rgba(72, 127, 136, 0.08) 0%, transparent 70%)',
+        filter: 'blur(50px)',
+        zIndex: 0,
+        pointerEvents: 'none'
+      }} />
+
+      <div className="container" style={{ position: 'relative', zIndex: 1 }}>
         {/* Header */}
         <header className="dashboard-header animate-fade-in">
           <div className="dashboard-greeting">
@@ -141,8 +165,23 @@ export default function DashboardPage() {
               onClick={() => navigate('/profile')}
               id="go-to-profile"
               aria-label="Ir para perfil"
+              style={{ padding: 0, overflow: 'hidden' }}
             >
-              <span>{firstName.charAt(0).toUpperCase()}</span>
+              {user?.profile_picture ? (
+                <img 
+                  src={`${api.defaults.baseURL.replace(/\/api\/v1\/?$/, '')}/${user.profile_picture.replace(/\/+/g, '/').replace(/^\//, '')}`}
+                  alt="Perfil"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.style.display = 'none';
+                    e.target.nextSibling.style.display = 'flex';
+                  }}
+                />
+              ) : null}
+              <span style={{ display: user?.profile_picture ? 'none' : 'flex', width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center' }}>
+                {firstName.charAt(0).toUpperCase()}
+              </span>
             </button>
           </div>
         </header>
@@ -237,22 +276,95 @@ export default function DashboardPage() {
           </div>
         </section>
 
-        {/* Categories */}
-        <section className="dashboard-categories" id="categories-section">
-          <h2 className="section-title animate-fade-in delay-3">Categorias</h2>
+        {/* Categories Section */}
+        <section className="dashboard-section animate-fade-in delay-2">
+          <div className="section-header">
+            <h2 className="section-title">Especialidades</h2>
+          </div>
           <div className="categories-grid">
-            {categories.map((cat, index) => (
-              <div
-                key={cat.id}
-                className={`category-card card card-interactive animate-fade-in-up delay-${index + 4}`}
-                onClick={() => navigate(`/services?category=${cat.id}`)}
-                id={`category-${cat.id}`}
+            {categories.map((cat) => (
+              <div 
+                key={cat.id} 
+                className="category-card"
+                onClick={() => navigate(`/services?category=${cat.id === 'estetica' ? 'ESTETICO' : 'ODONTOLOGICO'}`)}
+                style={{
+                  background: cat.gradient,
+                  borderRadius: '24px',
+                  padding: '2rem 1.5rem',
+                  color: '#111514',
+                  cursor: 'pointer',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  boxShadow: 'var(--shadow-lg)',
+                  transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  textAlign: 'center'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-8px) scale(1.02)';
+                  e.currentTarget.style.boxShadow = '0 20px 40px rgba(0,0,0,0.2)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                  e.currentTarget.style.boxShadow = 'var(--shadow-lg)';
+                }}
               >
-                <div className="category-icon" style={{ background: cat.gradient }}>
+                {/* Decorative Glass Circle */}
+                <div style={{
+                  position: 'absolute',
+                  top: '-20px',
+                  right: '-20px',
+                  width: '100px',
+                  height: '100px',
+                  background: 'rgba(255, 255, 255, 0.15)',
+                  borderRadius: '50%',
+                  filter: 'blur(10px)',
+                }} />
+
+                <div className="category-icon-wrapper" style={{ 
+                  marginBottom: '1.25rem',
+                  background: 'rgba(255, 255, 255, 0.25)',
+                  padding: '1rem',
+                  borderRadius: '16px',
+                  backdropFilter: 'blur(4px)',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                  color: '#111514'
+                }}>
                   {cat.icon}
                 </div>
-                <h3 className="category-title">{cat.title}</h3>
-                <p className="category-description">{cat.description}</p>
+                
+                <h3 style={{ 
+                  margin: '0 0 0.75rem 0', 
+                  fontSize: '1.5rem', 
+                  fontWeight: '800',
+                  color: '#111514',
+                  letterSpacing: '-0.02em'
+                }}>{cat.title}</h3>
+                
+                <p style={{ 
+                  margin: 0, 
+                  fontSize: '0.95rem', 
+                  fontWeight: '500',
+                  color: 'rgba(17, 21, 20, 0.85)', 
+                  lineHeight: 1.5,
+                  maxWidth: '200px'
+                }}>{cat.description}</p>
+                
+                {/* Large Background Icon */}
+                <div style={{ 
+                  position: 'absolute', 
+                  right: '-15px', 
+                  bottom: '-15px', 
+                  opacity: 0.08,
+                  transform: 'scale(2.5) rotate(-15deg)',
+                  color: '#111514',
+                  pointerEvents: 'none'
+                }}>
+                  {cat.icon}
+                </div>
               </div>
             ))}
           </div>

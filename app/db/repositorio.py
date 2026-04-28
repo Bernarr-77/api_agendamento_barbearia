@@ -351,6 +351,24 @@ def get_appointments_by_provider(
         raise NoAppointmentNeeded("Não existe agendamento para esse provider")
     return result
 
+def get_busy_times_by_provider(
+    db: Session,
+    provider_id: int,
+    target_date: datetime.date
+):
+    from sqlalchemy import cast, Date
+    query = (
+        select(Appointments.data_hora_inicio, Appointments.data_hora_fim)
+        .join(Service)
+        .filter(
+            Service.provider_id == provider_id,
+            Appointments.status != Status.CANCELADO,
+            cast(Appointments.data_hora_inicio, Date) == target_date
+        )
+    )
+    result = db.execute(query).all()
+    return result
+
 def get_appointments_by_client(
     db: Session,
     client_id: int

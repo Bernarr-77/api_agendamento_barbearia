@@ -251,7 +251,7 @@ ul, ol {
 
 .btn-primary {
   background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-  color: var(--neutral-800);
+  color: #111514;
   box-shadow: 0 4px 16px rgba(170, 240, 209, 0.35);
 }
 

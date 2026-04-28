@@ -137,6 +137,11 @@ export default function LoginPage() {
 
         {/* Footer */}
         <div className="login-footer">
+          <p style={{ marginBottom: '12px' }}>
+            <Link to="/forgot-password" className="login-link" id="go-to-forgot-password" style={{ fontSize: '14px' }}>
+              Esqueceu sua senha?
+            </Link>
+          </p>
           <p>
             Não tem conta?{' '}
             <Link to="/register" className="login-link" id="go-to-register">
