@@ -6,24 +6,24 @@
 
 /* ---- Design Tokens ---- */
 :root {
-  /* Primary Palette (Mint Green) */
-  --primary: #AAF0D1;
-  --primary-dark: #7EDDB5;
-  --primary-darker: #5BC99A;
-  --primary-light: #C8F7E1;
-  --primary-subtle: #E6FBF1;
+  /* Primary Palette (Coral) */
+  --primary: #FF9B7B;
+  --primary-dark: #FF7F50;
+  --primary-darker: #E66A3D;
+  --primary-light: #FFDACB;
+  --primary-subtle: #FFF0EB;
 
-  /* Secondary Palette (Sage Green) */
-  --secondary: #647C71;
-  --secondary-dark: #4D6359;
-  --secondary-light: #8FA69A;
-  --secondary-subtle: #D4DED9;
+  /* Secondary Palette (Teal) */
+  --secondary: #008B8B;
+  --secondary-dark: #006B6B;
+  --secondary-light: #4DB3B3;
+  --secondary-subtle: #E0F2F2;
 
-  /* Tertiary Palette (Teal) */
-  --tertiary: #487F88;
-  --tertiary-dark: #356069;
-  --tertiary-light: #6BA3AC;
-  --tertiary-subtle: #C5DFE3;
+  /* Tertiary Palette (Dark Teal) */
+  --tertiary: #005F5F;
+  --tertiary-dark: #004040;
+  --tertiary-light: #337F7F;
+  --tertiary-subtle: #CCE5E5;
 
   /* Neutral Palette */
   --neutral-50: #F8FAFA;
@@ -251,13 +251,13 @@ ul, ol {
 
 .btn-primary {
   background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-  color: #111514;
-  box-shadow: 0 4px 16px rgba(170, 240, 209, 0.35);
+  color: #FFFFFF;
+  box-shadow: 0 4px 16px rgba(255, 127, 80, 0.35);
 }
 
 .btn-primary:hover {
   background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-darker) 100%);
-  box-shadow: 0 6px 24px rgba(170, 240, 209, 0.45);
+  box-shadow: 0 6px 24px rgba(255, 127, 80, 0.45);
   transform: translateY(-1px);
 }
 
