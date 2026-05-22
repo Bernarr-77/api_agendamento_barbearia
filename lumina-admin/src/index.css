@@ -138,7 +138,10 @@
   --text-secondary: #CDD3D1;
   --text-tertiary: #A3ACA8;
   --text-inverse: #151A18;
-  --text-accent: #7EDDB5;
+  --text-accent: var(--primary);
+
+  /* Override dark text for active states to be visible in dark mode */
+  --tertiary-dark: var(--primary-light);
 
   /* Adjust Primary for better dark mode visibility */
   --primary-subtle: rgba(255, 127, 80, 0.1);

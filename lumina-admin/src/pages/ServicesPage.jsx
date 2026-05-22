@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import api from '../services/api';
 import './ServicesPage.css';
 
-const CATEGORIES = ['ESTETICO', 'ODONTOLOGICO'];
+const CATEGORIES = ['FISIOTERAPIA', 'QUIROPRAXIA', 'ESTETICO'];
 
 export default function ServicesPage() {
   const [providers, setProviders] = useState([]);
@@ -56,7 +56,7 @@ export default function ServicesPage() {
     setName('');
     setDuration('');
     setPrice('');
-    setCategory('ESTETICO');
+    setCategory('FISIOTERAPIA');
     setShowModal(true);
   }
 
@@ -178,8 +178,8 @@ export default function ServicesPage() {
                       <div key={svc.id} className="service-card card card-interactive" onClick={() => openEdit(svc)}>
                         <div className="service-card-top">
                           <span className="service-name">{svc.name}</span>
-                          <span className={`badge ${svc.category === 'ESTETICO' ? 'badge-confirmed' : 'badge-pending'}`}>
-                            {svc.category === 'ESTETICO' ? '💆 Estético' : '🦷 Odontológico'}
+                          <span className={`badge ${svc.category === 'FISIOTERAPIA' ? 'badge-confirmed' : svc.category === 'QUIROPRAXIA' ? 'badge-pending' : 'badge-active'}`}>
+                            {svc.category === 'FISIOTERAPIA' ? '💆 Fisioterapia' : svc.category === 'QUIROPRAXIA' ? '🦴 Quiropraxia' : '✨ Botox & Estética'}
                           </span>
                         </div>
                         <div className="service-card-details">
@@ -252,7 +252,7 @@ export default function ServicesPage() {
                       className={`category-btn ${category === cat ? 'active' : ''}`}
                       onClick={() => setCategory(cat)}
                     >
-                      {cat === 'ESTETICO' ? '💆 Estético' : '🦷 Odontológico'}
+                      {cat === 'FISIOTERAPIA' ? '💆 Fisioterapia' : cat === 'QUIROPRAXIA' ? '🦴 Quiropraxia' : '✨ Botox & Estética'}
                     </button>
                   ))}
                 </div>

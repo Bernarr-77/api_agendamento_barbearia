@@ -16,8 +16,10 @@ class StatusProvider(enum.Enum):
     INATIVO = 'INATIVO'
 
 class ServiceCategory(enum.Enum):
-    ODONTOLOGICO = "ODONTOLOGICO"
-    ESTETICO = 'ESTETICO'
+    FISIOTERAPIA = "FISIOTERAPIA"
+    QUIROPRAXIA = "QUIROPRAXIA"
+    ESTETICO = "ESTETICO"
+    
 
 class User(Base):
     __tablename__ = "usuarios"
