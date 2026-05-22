@@ -1,0 +1,32 @@
+.spinner-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+  padding: var(--space-2xl);
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+.spinner-track {
+  stroke: var(--neutral-200);
+}
+
+.spinner-head {
+  stroke: var(--primary-dark);
+  stroke-dasharray: 80;
+  stroke-dashoffset: 60;
+}
+
+.spinner-text {
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+  font-weight: var(--weight-medium);
+}
+
+@keyframes spin {
+  100% { transform: rotate(360deg); }
+}
